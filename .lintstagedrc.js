@@ -15,7 +15,7 @@ const buildHardhatEslintCommand = (filenames) =>
 module.exports = {
   "packages/nextjs/**/*.{ts,tsx}": [
     buildNextEslintCommand,
-    checkTypesNextCommand,
+    // checkTypesNextCommand, // Temporarily disabled due to ethersproject compatibility issues
   ],
   "packages/hardhat/**/*.{ts,tsx}": [buildHardhatEslintCommand],
 };

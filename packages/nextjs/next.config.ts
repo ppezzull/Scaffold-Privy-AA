@@ -1,6 +1,20 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  experimental: {
+    turbo: {
+      resolveAlias: {
+        underscore: "lodash",
+      },
+      resolveExtensions: [".mdx", ".tsx", ".ts", ".jsx", ".js", ".json"],
+      rules: {
+        "*.svg": {
+          loaders: ["@svgr/webpack"],
+          as: "*.js",
+        },
+      },
+    },
+  },
   reactStrictMode: true,
   devIndicators: false,
   typescript: {
