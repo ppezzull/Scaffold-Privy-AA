@@ -1,16 +1,21 @@
 // privyConfig.ts
 import type { PrivyClientConfig } from "@privy-io/react-auth";
-import { hardhat } from "viem/chains";
+import { enabledChains } from "~~/services/web3/wagmiConfig";
 
 export const privyConfig: PrivyClientConfig = {
+  // Configure embedded wallets for Account Abstraction
   embeddedWallets: {
     createOnLogin: "users-without-wallets",
     showWalletUIs: true,
   },
+  // Multiple login methods for better UX
   loginMethods: ["wallet", "email", "sms", "google"],
   appearance: {
-    showWalletLoginFirst: true,
+    showWalletLoginFirst: false, // Show social login first for embedded wallets
+    theme: "light",
   },
-  defaultChain: hardhat,
-  supportedChains: [hardhat],
+  // Use the first enabled chain as default (usually the target network)
+  defaultChain: enabledChains[0],
+  // Support all chains from wagmi config
+  supportedChains: [...enabledChains],
 };
