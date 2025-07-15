@@ -1,20 +1,19 @@
-import { wagmiConnectors } from "./wagmiConnectors";
+import { createConfig } from "@privy-io/wagmi";
 import { Chain, createClient, fallback, http } from "viem";
 import { hardhat, mainnet } from "viem/chains";
-import { createConfig } from "wagmi";
 import scaffoldConfig, { DEFAULT_ALCHEMY_API_KEY, ScaffoldConfig } from "~~/scaffold.config";
 import { getAlchemyHttpUrl } from "~~/utils/scaffold-eth";
 
 const { targetNetworks } = scaffoldConfig;
 
-// We always want to have mainnet enabled (ENS resolution, ETH price, etc). But only once.
-export const enabledChains = targetNetworks.find((network: Chain) => network.id === 1)
+// Always include Mainnet for ENS, price, etc.
+export const enabledChains = targetNetworks.some((c: Chain) => c.id === 1)
   ? targetNetworks
   : ([...targetNetworks, mainnet] as const);
 
 export const wagmiConfig = createConfig({
   chains: enabledChains,
-  connectors: wagmiConnectors,
+  // supply *both* your external connectors AND let Privy manage its embedded connector
   ssr: true,
   client: ({ chain }) => {
     let rpcFallbacks = [http()];
