@@ -1,7 +1,0 @@
-host = "0.0.0.0"
-port = 3000
-proof_mode = "fake"
-
-[[rpc_urls]]
-chain_id = 31337
-url = "http://anvil-l2-mantle:8545"
