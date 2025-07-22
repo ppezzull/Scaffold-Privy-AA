@@ -16,7 +16,6 @@
 - 🧱 [**Components**](https://docs.scaffoldeth.io/components/): Collection of common web3 components to quickly build your frontend.
 - � **Social Login with Privy**: Allow users to log in with email, Google, Discord, Telegram and other social accounts.
 - 🔐 **Account Abstraction**: Privy assigns users a smart wallet they can access with social login or connect their pre-existing wallet.
-- 💸 **Gasless Transactions**: Support for gasless transactions through account abstraction.
 - 🔐 **Integration with Traditional Wallets**: Connect to Coinbase Wallet, MetaMask, and other wallet providers.
 
 ![Debug Contracts tab](https://github.com/scaffold-eth/scaffold-eth-2/assets/55535804/b237af0c-5027-4849-a5c1-2e31495cccb1)
