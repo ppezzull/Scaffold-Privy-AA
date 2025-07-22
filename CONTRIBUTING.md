@@ -1,18 +1,18 @@
-# Welcome to Scaffold-ETH 2 Contributing Guide
+# Welcome to Scaffold-Privy-AA Contributing Guide
 
-Thank you for investing your time in contributing to Scaffold-ETH 2!
+Thank you for investing your time in contributing to Scaffold-Privy-AA!
 
 This guide aims to provide an overview of the contribution workflow to help us make the contribution process effective for everyone involved.
 
 ## About the Project
 
-Scaffold-ETH 2 is a minimal and forkable repo providing builders with a starter kit to build decentralized applications on Ethereum.
+Scaffold-Privy-AA is a minimal and forkable repo providing builders with a starter kit to build decentralized applications on Ethereum using Privy for smart wallet implementation and social login capabilities.
 
 Read the [README](README.md) to get an overview of the project.
 
 ### Vision
 
-The goal of Scaffold-ETH 2 is to provide the primary building blocks for a decentralized application.
+The goal of Scaffold-Privy-AA is to provide the primary building blocks for a decentralized application with account abstraction and seamless onboarding through social logins. This implementation allows users to interact with your dApp without requiring them to have a traditional wallet or understand blockchain complexities.
 
 The repo can be forked to include integrations and more features, but we want to keep the master branch simple and minimal.
 
@@ -42,9 +42,29 @@ Contributions are made via Issues and Pull Requests (PRs). A few general guideli
 
 Issues should be used to report problems, request a new feature, or discuss potential changes before a PR is created.
 
+#### Known Issues
+
+**React `isActive` prop warning**
+
+There's a console warning that needs to be fixed:
+
+```
+React does not recognize the `isActive` prop on a DOM element. If you intentionally want it to appear in the DOM as a custom attribute, spell it as lowercase `isactive` instead. If you accidentally passed it from a parent component, remove it from the DOM element.
+
+components/ScaffoldEthAppWithProviders.tsx (40:5) @ ScaffoldEthAppWithProviders
+```
+
+This warning appears when executing transactions and is related to the Privy Provider implementation. The error points to:
+
+```jsx
+<PrivyProvider appId={scaffoldConfig.privyProjectId} config={privyConfig}>
+```
+
+While not breaking functionality, this warning should be addressed for a cleaner developer experience.
+
 #### Solve an issue
 
-Scan through our [existing issues](https://github.com/scaffold-eth/scaffold-eth-2/issues) to find one that interests you.
+Scan through our existing issues to find one that interests you.
 
 If a contributor is working on the issue, they will be assigned to the individual. If you find an issue to work on, you are welcome to assign it to yourself and open a PR with a fix for it.
 

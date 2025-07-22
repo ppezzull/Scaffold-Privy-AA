@@ -9,9 +9,9 @@ export function HeaderConnectButton() {
 
   // Wallet connect method with callbacks for embedded AA wallets
   const { connectOrCreateWallet } = useConnectOrCreateWallet({
-    onSuccess: wallet => {
-      console.log("Smart Account wallet connected successfully", wallet);
-    },
+    // onSuccess: wallet => {
+    // console.log("Smart Account wallet connected successfully", wallet);
+    // },
     onError: err => {
       console.error("Wallet connection failed", err);
     },

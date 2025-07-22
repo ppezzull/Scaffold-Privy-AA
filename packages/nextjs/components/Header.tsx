@@ -59,7 +59,6 @@ export const HeaderMenuLinks = () => {
  */
 export const Header = () => {
   const { targetNetwork } = useTargetNetwork();
-  console.log("targetNetwork", targetNetwork);
   const isLocalNetwork = targetNetwork.id === hardhat.id;
 
   const burgerMenuRef = useRef<HTMLDetailsElement>(null);
