@@ -56,7 +56,7 @@ yarn install
 
 2. Set up your environment variables:
    - In the `packages/nextjs` directory, copy `.env.example` to `.env.local`
-   - Get an Alchemy API key from [alchemy.com](https://www.alchemy.com/)
+   - (Optional for localhost) Get an Alchemy API key from [alchemy.com](https://www.alchemy.com/) if connecting to public Ethereum networks
    - Create a Privy account at [console.privy.io](https://console.privy.io)
    - Create a new project and obtain your Privy project ID
    - Add both keys to the `.env.local` file
@@ -86,7 +86,7 @@ yarn start
 
 Visit your app on: `http://localhost:3000`. You can interact with your smart contract using the `Debug Contracts` page. You can tweak the app config in `packages/nextjs/scaffold.config.ts`.
 
-**Important**: Make sure to set up both your Alchemy API key and Privy project ID in the `.env.local` file. The Alchemy API key is required to access Ethereum networks, and the Privy project ID is needed for social login functionality. Without these, your dApp will not work properly.
+**Important**: Make sure to set up both your Alchemy API key (optional if only using localhost) and Privy project ID in the `.env.local` file. The Alchemy API key is required to access public Ethereum networks, and the Privy project ID is needed for social login functionality. Without these, your dApp may not work as expected.
 
 Run smart contract test with `yarn foundry:test`
 
