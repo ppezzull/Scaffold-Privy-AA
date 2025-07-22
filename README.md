@@ -1,7 +1,7 @@
 # 🏗 Scaffold-Privy-AA
 
 <h4 align="center">
-  <a href="https://docs.scaffoldeth.io">Base Documentation</a> |
+  <a href="https://docs.scaffoldeth.io">Scaffold Documentation</a> |
   <a href="https://privy.io">Privy</a>
 </h4>
 
@@ -50,7 +50,8 @@ To get started with Scaffold-Privy-AA, follow the steps below:
 1. Install dependencies if it was skipped in CLI:
 
 ```
-cd my-dapp-example
+git clone https://github.com/ppezzull/Scaffold-Privy-AA
+cd Scaffold-Privy-AA
 yarn install
 ```
 

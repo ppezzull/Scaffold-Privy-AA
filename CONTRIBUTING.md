@@ -48,7 +48,7 @@ Issues should be used to report problems, request a new feature, or discuss pote
 
 There's a console warning that needs to be fixed:
 
-```
+```markdown
 React does not recognize the `isActive` prop on a DOM element. If you intentionally want it to appear in the DOM as a custom attribute, spell it as lowercase `isactive` instead. If you accidentally passed it from a parent component, remove it from the DOM element.
 
 components/ScaffoldEthAppWithProviders.tsx (40:5) @ ScaffoldEthAppWithProviders
@@ -61,6 +61,10 @@ This warning appears when executing transactions and is related to the Privy Pro
 ```
 
 While not breaking functionality, this warning should be addressed for a cleaner developer experience.
+
+#### Gasless Transactions
+
+Although gasless transactions are advertised as a feature, they are not currently enabled in this template. Community contributions to integrate a paymaster or relayer solution (for example, OpenGSN, Biconomy, or Gelato) for gasless transaction support are welcome.
 
 #### Solve an issue
 
