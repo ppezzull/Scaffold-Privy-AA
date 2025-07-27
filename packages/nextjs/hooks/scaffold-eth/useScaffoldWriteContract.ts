@@ -113,9 +113,9 @@ export function useScaffoldWriteContract<TContractName extends ContractName>(
         abi: deployedContractData.abi as Abi,
         address: deployedContractData.address,
         ...variables,
-      } as WriteContractVariables<Abi, string, any[], Config, number>;
+      } as unknown as WriteContractVariables<Abi, string, any[], Config, number>;
 
-      if (!finalConfig?.disableSimulate) {
+      if (!(finalConfig as any)?.disableSimulate) {
         await simulateContractWriteAndNotifyError({ wagmiConfig, writeContractParams: writeContractObject });
       }
 
@@ -167,7 +167,7 @@ export function useScaffoldWriteContract<TContractName extends ContractName>(
         abi: deployedContractData.abi as Abi,
         address: deployedContractData.address,
         ...variables,
-      } as WriteContractVariables<Abi, string, any[], Config, number>,
+      } as unknown as WriteContractVariables<Abi, string, any[], Config, number>,
       options as
         | MutateOptions<
             WriteContractReturnType,

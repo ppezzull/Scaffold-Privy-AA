@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Hash, Transaction, TransactionReceipt, formatEther, formatUnits } from "viem";
-import { hardhat } from "viem/chains";
+import { baseSepolia } from "viem/chains";
 import { usePublicClient } from "wagmi";
 import { Address } from "~~/components/scaffold-eth";
 import { useTargetNetwork } from "~~/hooks/scaffold-eth/useTargetNetwork";
@@ -11,7 +11,7 @@ import { decodeTransactionData, getFunctionDetails } from "~~/utils/scaffold-eth
 import { replacer } from "~~/utils/scaffold-eth/common";
 
 const TransactionComp = ({ txHash }: { txHash: Hash }) => {
-  const client = usePublicClient({ chainId: hardhat.id });
+  const client = usePublicClient({ chainId: baseSepolia.id });
   const router = useRouter();
   const [transaction, setTransaction] = useState<Transaction>();
   const [receipt, setReceipt] = useState<TransactionReceipt>();
@@ -131,11 +131,15 @@ const TransactionComp = ({ txHash }: { txHash: Hash }) => {
                 </td>
                 <td>
                   <ul>
-                    {receipt?.logs?.map((log, i) => (
-                      <li key={i}>
-                        <strong>Log {i} topics:</strong> {JSON.stringify(log.topics, replacer, 2)}
-                      </li>
-                    ))}
+                    {receipt?.logs?.map((log, i) => {
+                      // Patch: assert log type to include topics
+                      const logWithTopics = log as typeof log & { topics?: string[] };
+                      return (
+                        <li key={i}>
+                          <strong>Log {i} topics:</strong> {JSON.stringify(logWithTopics.topics, replacer, 2)}
+                        </li>
+                      );
+                    })}
                   </ul>
                 </td>
               </tr>
