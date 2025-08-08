@@ -1,4 +1,5 @@
-import "./globals.css";
+import "../styles/globals.daisy.css";
+import "../styles/globals.shadcn.css";
 import { ScaffoldEthAppWithProviders } from "~~/components/ScaffoldEthAppWithProviders";
 import { ThemeProvider } from "~~/components/ThemeProvider";
 import { getMetadata } from "~~/utils/scaffold-eth/getMetadata";
