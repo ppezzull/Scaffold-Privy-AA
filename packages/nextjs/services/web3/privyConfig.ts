@@ -1,6 +1,6 @@
 // privyConfig.ts
 import type { PrivyClientConfig } from "@privy-io/react-auth";
-import { enabledChains } from "~~/services/web3/wagmiConfig";
+import { wagmiConfig } from "~~/services/web3/wagmiConfig";
 
 export const privyConfig: PrivyClientConfig = {
   // Configure embedded wallets for Account Abstraction
@@ -15,7 +15,7 @@ export const privyConfig: PrivyClientConfig = {
     theme: "light",
   },
   // Use the first enabled chain as default (usually the target network)
-  defaultChain: enabledChains[0],
+  defaultChain: wagmiConfig.chains[0],
   // Support all chains from wagmi config
-  supportedChains: [...enabledChains],
+  supportedChains: [...wagmiConfig.chains],
 };

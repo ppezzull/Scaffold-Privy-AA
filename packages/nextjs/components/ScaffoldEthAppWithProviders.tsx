@@ -1,5 +1,6 @@
 "use client";
 
+import { NetworkSwitcher } from "./NetworkSwitcher";
 import { PrivyProvider } from "@privy-io/react-auth";
 import { WagmiProvider } from "@privy-io/wagmi";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -17,9 +18,10 @@ const ScaffoldEthApp = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <>
-      <div className={`flex flex-col min-h-screen `}>
+      <div className={`flex flex-col min-h-screen`}>
         <Header />
-        <main className="relative flex flex-col flex-1">{children}</main>
+        <NetworkSwitcher />
+        <main className="relative flex flex-col flex-1 bg-slate-900">{children}</main>
         <Footer />
       </div>
       <Toaster />

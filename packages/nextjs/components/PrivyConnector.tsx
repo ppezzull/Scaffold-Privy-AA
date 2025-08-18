@@ -1,11 +1,12 @@
 // components/PrivyConnector.tsx
 import React from "react";
-import { useConnectOrCreateWallet, usePrivy, useWallets } from "@privy-io/react-auth";
+import { useConnectOrCreateWallet, usePrivy } from "@privy-io/react-auth";
+import { useAccount } from "wagmi";
 
 export function HeaderConnectButton() {
   // Privy auth state and actions
   const { ready, authenticated, logout, user } = usePrivy();
-  const { wallets } = useWallets();
+  const { address } = useAccount();
 
   // Wallet connect method with callbacks for embedded AA wallets
   const { connectOrCreateWallet } = useConnectOrCreateWallet({
@@ -28,14 +29,10 @@ export function HeaderConnectButton() {
 
   // If authenticated, show user info and disconnect option
   if (authenticated) {
-    const embeddedWallet = wallets.find(wallet => wallet.walletClientType === "privy");
-    const isEmbeddedWallet = !!embeddedWallet;
-
     return (
       <div className="flex items-center gap-2">
         <div className="text-sm">
-          {user?.email?.address || user?.phone?.number || "Connected"}
-          {isEmbeddedWallet && <span className="ml-1 text-xs text-green-600">(Smart Account)</span>}
+          {user?.email?.address ? user?.email?.address : address?.slice(0, 6) + "..." + address?.slice(-4)}
         </div>
         <button onClick={logout} className="btn btn-outline btn-sm">
           Disconnect
