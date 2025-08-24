@@ -130,10 +130,14 @@ For Privy integration, check out the [Privy documentation](https://docs.privy.io
    # Server-only private key used by Server Actions to mint short-lived Supabase JWTs
    # Paste the PEM with real newlines (BEGIN/END). Do NOT prefix with NEXT_PUBLIC.
    SUPABASE_JWT_PRIVATE_KEY=
+
+   # Server-only Service Role key for admin upserts (e.g., creating users by Privy DID)
+   SUPABASE_SERVICE_ROLE_KEY=
    ```
    Where to find these:
    - URL and anon key: Supabase → Settings → API
    - Private key: Supabase → Settings → API → JWT Signing Keys (enable asymmetric, e.g., RS256)
+   - Service Role key: Supabase → Settings → API → Service Role Key (server-only)
 
 ## How Privy Works in this Project
 

@@ -26,6 +26,14 @@ Server-only secret required by the Server Action (included in `.env.example`; do
 SUPABASE_JWT_PRIVATE_KEY=
 ```
 
+Admin key for user upserts (included in `.env.example`; server-only):
+
+```bash
+# Supabase service role key used by server-only admin client to upsert users before a session exists
+# NEVER expose client-side. Configure in your platform’s server env (e.g., Vercel project settings).
+SUPABASE_SERVICE_ROLE_KEY=
+```
+
 * Ensure your Supabase project uses **asymmetric Signing Keys** (JWKS available at `/auth/v1/.well-known/jwks.json`). ([Supabase][2], [DEV Community][3])
 * We’ll **verify Privy tokens** against **Privy’s JWKS**: `https://auth.privy.io/api/v1/apps/<APP_ID>/jwks.json`. ([Privy Docs][1])
 
@@ -100,6 +108,7 @@ Create `app/(auth)/actions.ts`:
 'use server'
 
 import { jwtVerify, createRemoteJWKSet, importPKCS8, SignJWT } from 'jose'
+import { getOrCreateUserUuidFromPrivyPayload } from '@/lib/supabase/user'
 
 // Privy JWKS for your app
 const PRIVY_JWKS = createRemoteJWKSet(
@@ -110,12 +119,7 @@ const PRIVY_JWKS = createRemoteJWKSet(
 const SUPABASE_JWT_PRIVATE_KEY = process.env.SUPABASE_JWT_PRIVATE_KEY!
 const SUPABASE_ISS = `https://${process.env.NEXT_PUBLIC_SUPABASE_URL?.replace(/^https?:\/\//, '')}/auth/v1` // issuer
 
-// TODO: Implement your own mapping. This must return a UUID that your RLS expects in auth.uid().
-async function getOrCreateUserUuidFromPrivyPayload(payload: any): Promise<string> {
-  // Examples of identifying fields: payload.sub, payload.email, payload.user.id (depends on Privy token shape)
-  // Upsert user row and return users.id (UUID)
-  return '<uuid-from-db>'
-}
+// Implementation for user mapping is shown in section 3.1 — see `lib/supabase/user` for a production-ready helper
 
 export async function exchangePrivyToken(privyAccessToken: string): Promise<string> {
   if (!privyAccessToken) throw new Error('missing_privy_token')
@@ -147,6 +151,108 @@ export async function exchangePrivyToken(privyAccessToken: string): Promise<stri
   return supabaseJwt
 }
 ```
+
+### 3.1) Production-ready user mapping (admin upsert)
+
+We key on `payload.sub` (the user’s Privy DID) as the stable external identifier, upsert a row in `users`, and return our internal UUID so the exchanged Supabase JWT can set `sub = <uuid>` for RLS. This requires a server-only Supabase admin client using the Service Role key.
+
+Suggested schema (SQL):
+
+```sql
+-- one-time migration
+create table if not exists public.users (
+  id uuid primary key default gen_random_uuid(),
+  privy_did text unique not null,
+  email text,
+  created_at timestamptz not null default now()
+);
+
+create index if not exists users_privy_did_idx on public.users (privy_did);
+```
+
+Admin client (server-only):
+
+```ts
+// lib/supabase/admin.ts (server-only)
+import { createClient } from '@supabase/supabase-js'
+
+export const supabaseAdmin = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!, // NEVER expose client-side
+  { auth: { persistSession: false } }
+)
+```
+
+Finished function (replace the TODO in your Server Action file):
+
+```ts
+import { supabaseAdmin } from '@/lib/supabase/admin'
+
+type PrivyAccessTokenPayload = {
+  sub: string;           // Privy DID (stable user id)
+  sid?: string;
+  iss?: string;          // 'privy.io'
+  aud?: string;          // your app id
+  iat?: number;
+  exp?: number;
+  // If using an Identity Token instead of Access Token, you may also see:
+  // linked_accounts?: string;   // JSON string
+  // custom_metadata?: string;   // JSON string
+}
+
+export async function getOrCreateUserUuidFromPrivyPayload(
+  payload: PrivyAccessTokenPayload
+): Promise<string> {
+  if (!payload?.sub) throw new Error('privy_payload_missing_sub')
+  const privyDid = payload.sub
+
+  // 1) Lookup
+  {
+    const { data, error } = await supabaseAdmin
+      .from('users')
+      .select('id')
+      .eq('privy_did', privyDid)
+      .maybeSingle()
+    if (error) throw new Error(`users_lookup_failed:${error.message}`)
+    if (data?.id) return data.id
+  }
+
+  // 2) Optional: parse email from Identity Token (not present in Access Tokens)
+  let email: string | null = null
+  // Example if later using Identity Token with linked_accounts JSON:
+  // try {
+  //   const la = (payload as any)?.linked_accounts ? JSON.parse((payload as any).linked_accounts) : []
+  //   const emailAcc = la.find((a: any) => a?.type === 'email' && a?.address)
+  //   email = emailAcc?.address ?? null
+  // } catch {}
+
+  // 3) Insert
+  const { data: inserted, error: insertErr } = await supabaseAdmin
+    .from('users')
+    .insert({ privy_did: privyDid, email })
+    .select('id')
+    .single()
+  if (insertErr) {
+    // Handle race: unique violation
+    if ((insertErr as any).code === '23505') {
+      const { data: again, error: againErr } = await supabaseAdmin
+        .from('users')
+        .select('id')
+        .eq('privy_did', privyDid)
+        .single()
+      if (againErr || !again?.id) throw new Error(`users_select_after_conflict_failed:${againErr?.message}`)
+      return again.id
+    }
+    throw new Error(`users_insert_failed:${insertErr.message}`)
+  }
+  return inserted.id
+}
+```
+
+Why `payload.sub`:
+
+- Privy’s access token is a JWT that includes `sub` as the user’s Privy DID (stable identifier). Use it to link local users. ([Privy Docs][1])
+- If you enable Identity Tokens, they also include `sub` plus richer fields (e.g., `linked_accounts`, `custom_metadata`) you can parse to hydrate optional columns like `email`. ([Privy Docs][6])
 
 **Why this works:**
 
