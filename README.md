@@ -121,6 +121,20 @@ For Privy integration, check out the [Privy documentation](https://docs.privy.io
    - Enable social login methods like Google, Discord, Email, etc.
 4. Configure additional customization in `components/PrivyConnector.tsx`
 
+5. If you’re using the Privy + Supabase RLS integration, also set the Supabase variables in `packages/nextjs/.env.local`:
+   ```
+   # Supabase project URL and publishable (anon) key
+   NEXT_PUBLIC_SUPABASE_URL=https://<PROJECT_ID>.supabase.co
+   NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY=your-supabase-anon-key
+
+   # Server-only private key used by Server Actions to mint short-lived Supabase JWTs
+   # Paste the PEM with real newlines (BEGIN/END). Do NOT prefix with NEXT_PUBLIC.
+   SUPABASE_JWT_PRIVATE_KEY=
+   ```
+   Where to find these:
+   - URL and anon key: Supabase → Settings → API
+   - Private key: Supabase → Settings → API → JWT Signing Keys (enable asymmetric, e.g., RS256)
+
 ## How Privy Works in this Project
 
 Privy provides users with a smart wallet that they can access through:
