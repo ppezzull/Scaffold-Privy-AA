@@ -113,10 +113,14 @@ export function useScaffoldWriteContract<TContractName extends ContractName>(
         abi: deployedContractData.abi as Abi,
         address: deployedContractData.address,
         ...variables,
-      } as unknown as WriteContractVariables<Abi, string, any[], Config, number>;
+      } as WriteContractVariables<Abi, string, any[], Config, number>;
 
-      if (!(finalConfig as any)?.disableSimulate) {
-        await simulateContractWriteAndNotifyError({ wagmiConfig, writeContractParams: writeContractObject });
+      if (!finalConfig?.disableSimulate) {
+        await simulateContractWriteAndNotifyError({
+          wagmiConfig,
+          writeContractParams: writeContractObject,
+          chainId: selectedNetwork.id as AllowedChainIds,
+        });
       }
 
       const makeWriteWithParams = () =>
@@ -167,7 +171,7 @@ export function useScaffoldWriteContract<TContractName extends ContractName>(
         abi: deployedContractData.abi as Abi,
         address: deployedContractData.address,
         ...variables,
-      } as unknown as WriteContractVariables<Abi, string, any[], Config, number>,
+      } as WriteContractVariables<Abi, string, any[], Config, number>,
       options as
         | MutateOptions<
             WriteContractReturnType,

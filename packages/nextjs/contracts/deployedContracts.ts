@@ -148,8 +148,7 @@ const deployedContracts = {
         },
       ],
       inheritedFunctions: {},
-      deploymentFile: "run-1753584981.json",
-      deploymentScript: "Deploy.s.sol",
+      deployedOnBlock: 1,
     },
   },
 } as const;

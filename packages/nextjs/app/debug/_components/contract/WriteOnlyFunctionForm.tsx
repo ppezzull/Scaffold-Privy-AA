@@ -16,6 +16,7 @@ import {
 import { IntegerInput } from "~~/components/scaffold-eth";
 import { useTransactor } from "~~/hooks/scaffold-eth";
 import { useTargetNetwork } from "~~/hooks/scaffold-eth/useTargetNetwork";
+import { AllowedChainIds } from "~~/utils/scaffold-eth";
 import { simulateContractWriteAndNotifyError } from "~~/utils/scaffold-eth/contract";
 
 type WriteOnlyFunctionFormProps = {
@@ -35,7 +36,7 @@ export const WriteOnlyFunctionForm = ({
 }: WriteOnlyFunctionFormProps) => {
   const [form, setForm] = useState<Record<string, any>>(() => getInitialFormState(abiFunction));
   const [txValue, setTxValue] = useState<string>("");
-  const { chain, address: account } = useAccount();
+  const { chain } = useAccount();
   const writeTxn = useTransactor();
   const { targetNetwork } = useTargetNetwork();
   const writeDisabled = !chain || chain?.id !== targetNetwork.id;
@@ -53,10 +54,12 @@ export const WriteOnlyFunctionForm = ({
           abi: abi,
           args: getParsedContractFunctionArgs(form),
           value: BigInt(txValue),
-          chain: targetNetwork,
-          account,
         };
-        await simulateContractWriteAndNotifyError({ wagmiConfig, writeContractParams: writeContractObj });
+        await simulateContractWriteAndNotifyError({
+          wagmiConfig,
+          writeContractParams: writeContractObj,
+          chainId: targetNetwork.id as AllowedChainIds,
+        });
 
         const makeWriteWithParams = () => writeContractAsync(writeContractObj);
         await writeTxn(makeWriteWithParams);
@@ -72,11 +75,7 @@ export const WriteOnlyFunctionForm = ({
     hash: result,
   });
   useEffect(() => {
-    if (txResult && (txResult as TransactionReceipt).blockHash) {
-      setDisplayedTxResult(txResult as TransactionReceipt);
-    } else {
-      setDisplayedTxResult(undefined);
-    }
+    setDisplayedTxResult(txResult);
   }, [txResult]);
 
   // TODO use `useMemo` to optimize also update in ReadOnlyFunctionForm
@@ -140,9 +139,9 @@ export const WriteOnlyFunctionForm = ({
           </div>
         </div>
       </div>
-      {zeroInputs && txResult && (txResult as TransactionReceipt).blockHash ? (
+      {zeroInputs && txResult ? (
         <div className="grow basis-0">
-          <TxReceipt txResult={txResult as TransactionReceipt} />
+          <TxReceipt txResult={txResult} />
         </div>
       ) : null}
     </div>
