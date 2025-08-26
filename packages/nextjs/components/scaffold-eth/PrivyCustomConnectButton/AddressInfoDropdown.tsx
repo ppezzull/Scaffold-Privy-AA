@@ -1,5 +1,6 @@
 import { useRef, useState } from "react";
 import { NetworkOptions } from "./NetworkOptions";
+import { usePrivy } from "@privy-io/react-auth";
 import { getAddress } from "viem";
 import { Address } from "viem";
 import { useDisconnect } from "wagmi";
@@ -26,6 +27,7 @@ type AddressInfoDropdownProps = {
 
 export const AddressInfoDropdown = ({ address, displayName, blockExplorerAddressLink }: AddressInfoDropdownProps) => {
   const { disconnect } = useDisconnect();
+  const { logout } = usePrivy();
   const checkSumAddress = getAddress(address);
 
   const { copyToClipboard: copyAddressToClipboard, isCopiedToClipboard: isAddressCopiedToClipboard } =
@@ -105,7 +107,15 @@ export const AddressInfoDropdown = ({ address, displayName, blockExplorerAddress
             <button
               className="menu-item text-error h-8 btn-sm rounded-xl! flex gap-3 py-3"
               type="button"
-              onClick={() => disconnect()}
+              onClick={async () => {
+                try {
+                  // Disconnect wagmi and logout from Privy to clear session cookies
+                  disconnect();
+                  await logout();
+                } finally {
+                  closeDropdown();
+                }
+              }}
             >
               <ArrowLeftOnRectangleIcon className="h-6 w-4 ml-2 sm:ml-0" /> <span>Disconnect</span>
             </button>
