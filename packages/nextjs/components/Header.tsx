@@ -27,7 +27,7 @@ export const menuLinks: HeaderMenuLink[] = [
   {
     label: "Debug Contracts",
     href: "/debug",
-    icon: <BugAntIcon className="h-4 w-4" />,
+    icon: <BugAntIcon className="h-4 w-4 text-[var(--color-base-content)]" />,
   },
 ];
 
@@ -41,8 +41,8 @@ export const Header = () => {
   const pathname = usePathname();
 
   return (
-    <header className="sticky top-0 z-20 w-full border-b border-border bg-background/80 backdrop-blur">
-      <div className="mx-auto flex h-14 items-center justify-between px-2 sm:px-4">
+    <header className="sticky top-0 z-20 w-full bg-base-100 backdrop-blur">
+      <div className="mx-auto flex h-16 items-center justify-between px-2 sm:px-4">
         {/* Left: Mobile burger + Logo */}
         <div className="flex items-center gap-2">
           {/* Mobile menu */}
@@ -50,15 +50,17 @@ export const Header = () => {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" aria-label="Open menu">
-                  <Bars3Icon className="h-5 w-5" />
+                  <Bars3Icon className="h-6 w-6 text-[var(--color-base-content)]" stroke="currentColor" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-52">
                 {menuLinks.map(({ label, href, icon }) => (
                   <DropdownMenuItem key={href} asChild>
-                    <Link href={href} className="flex items-center gap-2">
-                      {icon}
-                      <span>{label}</span>
+                    <Link href={href} className="flex items-center">
+                      <span className="flex items-center gap-2">
+                        {icon && <span className="flex-shrink-0">{icon}</span>}
+                        <span>{label}</span>
+                      </span>
                     </Link>
                   </DropdownMenuItem>
                 ))}
@@ -68,18 +70,18 @@ export const Header = () => {
 
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 ml-1 lg:ml-2 mr-2 shrink-0">
-            <div className="relative h-8 w-8">
+            <div className="relative h-10 w-10">
               <Image alt="SE2 logo" className="cursor-pointer" fill src="/logo.svg" />
             </div>
             <div className="hidden sm:flex flex-col leading-tight">
               <span className="font-bold">Scaffold-ETH</span>
-              <span className="text-[10px]">Ethereum dev stack</span>
+              <span className="text-[12px]">Ethereum dev stack</span>
             </div>
           </Link>
         </div>
 
         {/* Desktop navigation */}
-        <div className="hidden lg:flex flex-1 items-center justify-start">
+        <div className="hidden lg:flex flex-1 items-center justify-start lg:ml-3">
           <NavigationMenu>
             <NavigationMenuList className="gap-2">
               {menuLinks.map(({ label, href, icon }) => {
@@ -90,9 +92,11 @@ export const Header = () => {
                       asChild
                       className={cn("px-3 py-1.5 rounded-full gap-2", isActive && "bg-secondary shadow")}
                     >
-                      <Link href={href} className="flex items-center gap-2">
-                        {icon}
-                        <span className="text-sm">{label}</span>
+                      <Link href={href} className="flex items-center">
+                        <span className="flex items-center gap-2">
+                          {icon && <span className="flex-shrink-0">{icon}</span>}
+                          <span className="text-sm">{label}</span>
+                        </span>
                       </Link>
                     </NavigationMenuLink>
                   </NavigationMenuItem>

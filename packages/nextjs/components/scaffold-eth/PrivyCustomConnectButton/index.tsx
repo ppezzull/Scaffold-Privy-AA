@@ -29,7 +29,7 @@ export const PrivyCustomConnectButton = () => {
 
   if (!ready) {
     return (
-      <Button disabled size="sm">
+      <Button disabled size="sm" className="rounded-full font-bold">
         Loading…
       </Button>
     );
@@ -39,6 +39,7 @@ export const PrivyCustomConnectButton = () => {
     return (
       <Button
         size="sm"
+        className="rounded-full font-bold cursor-pointer hover:brightness-90 active:brightness-75 transition duration-150"
         onClick={() => {
           if (!authenticated) {
             connectOrCreateWallet();

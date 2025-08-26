@@ -16,6 +16,7 @@
     "vercel:yolo": "vercel --build-env YARN_ENABLE_IMMUTABLE_INSTALLS=false --build-env ENABLE_EXPERIMENTAL_COREPACK=1 --build-env NEXT_PUBLIC_IGNORE_BUILD_ERROR=true --build-env VERCEL_TELEMETRY_DISABLED=1"
   },
   "dependencies": {
+    "@headlessui/react": "^2.2.7",
     "@heroicons/react": "~2.1.5",
     "@privy-io/react-auth": "^2.21.4",
     "@privy-io/wagmi": "^1.0.6",
@@ -32,12 +33,14 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "daisyui": "5.0.9",
+    "headlessui": "^0.0.0",
     "kubo-rpc-client": "~5.0.2",
     "lucide-react": "^0.541.0",
     "next": "~15.2.3",
     "next-nprogress-bar": "~2.3.13",
     "next-themes": "~0.3.0",
     "qrcode.react": "~4.0.1",
+    "radix-ui": "^1.4.3",
     "react": "~19.0.0",
     "react-dom": "~19.0.0",
     "react-hot-toast": "~2.4.0",
