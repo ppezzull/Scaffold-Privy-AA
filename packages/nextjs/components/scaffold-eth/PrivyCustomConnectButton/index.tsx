@@ -1,10 +1,11 @@
 "use client";
 
+import { Button } from "../../ui/button";
 import { Balance } from "../Balance";
 import { AddressInfoDropdown } from "./AddressInfoDropdown";
 import { AddressQRCodeModal } from "./AddressQRCodeModal";
 import { WrongNetworkDropdown } from "./WrongNetworkDropdown";
-import { useConnectOrCreateWallet, usePrivy } from "@privy-io/react-auth";
+import { useConnectOrCreateWallet, useConnectWallet, usePrivy } from "@privy-io/react-auth";
 import { Address } from "viem";
 import { useAccount } from "wagmi";
 import { useNetworkColor } from "~~/hooks/scaffold-eth";
@@ -20,22 +21,35 @@ export const PrivyCustomConnectButton = () => {
   const { connectOrCreateWallet } = useConnectOrCreateWallet({
     onError: err => console.error("Wallet connection failed", err),
   });
+  const { connectWallet } = useConnectWallet({
+    onError: err => console.error("Wallet reconnect failed", err),
+  });
 
   const blockExplorerAddressLink = address ? getBlockExplorerAddressLink(targetNetwork, address) : undefined;
 
   if (!ready) {
     return (
-      <button disabled className="btn btn-primary btn-sm">
+      <Button disabled size="sm">
         Loading…
-      </button>
+      </Button>
     );
   }
 
-  if (!authenticated || !isConnected || !address || !chain) {
+  if (!isConnected || !address || !chain) {
     return (
-      <button className="btn btn-primary btn-sm" onClick={() => connectOrCreateWallet()} type="button">
+      <Button
+        size="sm"
+        onClick={() => {
+          if (!authenticated) {
+            connectOrCreateWallet();
+          } else {
+            connectWallet();
+          }
+        }}
+        type="button"
+      >
         Connect Smart Wallet
-      </button>
+      </Button>
     );
   }
 

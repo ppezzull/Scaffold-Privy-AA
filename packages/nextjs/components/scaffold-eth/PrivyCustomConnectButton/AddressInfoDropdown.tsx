@@ -1,4 +1,14 @@
 import { useRef, useState } from "react";
+import { Button } from "../../ui/button";
+import { Dialog, DialogContent, DialogTrigger } from "../../ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "../../ui/dropdown-menu";
+import { AddressQRCodeModal } from "./AddressQRCodeModal";
 import { NetworkOptions } from "./NetworkOptions";
 import { usePrivy } from "@privy-io/react-auth";
 import { getAddress } from "viem";
@@ -43,21 +53,25 @@ export const AddressInfoDropdown = ({ address, displayName, blockExplorerAddress
   useOutsideClick(dropdownRef, closeDropdown);
 
   return (
-    <>
-      <details ref={dropdownRef} className="dropdown dropdown-end leading-3">
-        <summary className="btn btn-secondary btn-sm pr-2 shadow-md dropdown-toggle gap-0 h-auto!">
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button size="sm" variant="secondary" className="pr-2 shadow-md gap-0">
           <span className="ml-2 mr-1">
             {isENS(displayName) ? displayName : checkSumAddress?.slice(0, 6) + "..." + checkSumAddress?.slice(-4)}
           </span>
           <ChevronDownIcon className="h-6 w-4 ml-2 sm:ml-0" />
-        </summary>
-        <ul className="dropdown-content menu z-2 p-2 mt-2 shadow-center shadow-accent bg-base-200 rounded-box gap-1">
-          <NetworkOptions hidden={!selectingNetwork} />
-          <li className={selectingNetwork ? "hidden" : ""}>
-            <div
-              className="h-8 btn-sm rounded-xl! flex gap-3 py-3 cursor-pointer"
-              onClick={() => copyAddressToClipboard(checkSumAddress)}
-            >
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent className="z-20 p-1 mt-1">
+        {allowedNetworks.length > 1 && !selectingNetwork && (
+          <DropdownMenuItem onClick={() => setSelectingNetwork(true)} className="flex gap-3">
+            <ArrowsRightLeftIcon className="h-6 w-4 ml-2 sm:ml-0" /> <span>Switch Network</span>
+          </DropdownMenuItem>
+        )}
+        <NetworkOptions hidden={!selectingNetwork} />
+        {!selectingNetwork && (
+          <>
+            <DropdownMenuItem className="flex gap-3" onClick={() => copyAddressToClipboard(checkSumAddress)}>
               {isAddressCopiedToClipboard ? (
                 <>
                   <CheckCircleIcon className="text-xl font-normal h-6 w-4 ml-2 sm:ml-0" aria-hidden="true" />
@@ -69,47 +83,39 @@ export const AddressInfoDropdown = ({ address, displayName, blockExplorerAddress
                   <span className="whitespace-nowrap">Copy address</span>
                 </>
               )}
-            </div>
-          </li>
-          <li className={selectingNetwork ? "hidden" : ""}>
-            <label htmlFor="qrcode-modal" className="h-8 btn-sm rounded-xl! flex gap-3 py-3">
-              <QrCodeIcon className="h-6 w-4 ml-2 sm:ml-0" />
-              <span className="whitespace-nowrap">View QR Code</span>
-            </label>
-          </li>
-          <li className={selectingNetwork ? "hidden" : ""}>
-            <button className="h-8 btn-sm rounded-xl! flex gap-3 py-3" type="button">
-              <ArrowTopRightOnSquareIcon className="h-6 w-4 ml-2 sm:ml-0" />
+            </DropdownMenuItem>
+            <Dialog>
+              <DialogTrigger asChild>
+                <DropdownMenuItem className="flex gap-3">
+                  <QrCodeIcon className="h-6 w-4 ml-2 sm:ml-0" />
+                  <span className="whitespace-nowrap">View QR Code</span>
+                </DropdownMenuItem>
+              </DialogTrigger>
+              <DialogContent>
+                <div className="space-y-3 py-6">
+                  <div className="flex flex-col items-center gap-6">
+                    {/* Using the longer address modal content from AddressQRCodeModal */}
+                    <AddressQRCodeModal address={address} modalId="qrcode-modal" />
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
+            <DropdownMenuItem className="flex gap-3" asChild>
               <a
                 target="_blank"
                 href={blockExplorerAddressLink}
                 rel="noopener noreferrer"
                 className="whitespace-nowrap"
               >
+                <ArrowTopRightOnSquareIcon className="h-6 w-4 ml-2 sm:ml-0" />
                 View on Block Explorer
               </a>
-            </button>
-          </li>
-          {allowedNetworks.length > 1 ? (
-            <li className={selectingNetwork ? "hidden" : ""}>
-              <button
-                className="h-8 btn-sm rounded-xl! flex gap-3 py-3"
-                type="button"
-                onClick={() => {
-                  setSelectingNetwork(true);
-                }}
-              >
-                <ArrowsRightLeftIcon className="h-6 w-4 ml-2 sm:ml-0" /> <span>Switch Network</span>
-              </button>
-            </li>
-          ) : null}
-          <li className={selectingNetwork ? "hidden" : ""}>
-            <button
-              className="menu-item text-error h-8 btn-sm rounded-xl! flex gap-3 py-3"
-              type="button"
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              className="text-error flex gap-3"
               onClick={async () => {
                 try {
-                  // Disconnect wagmi and logout from Privy to clear session cookies
                   disconnect();
                   await logout();
                 } finally {
@@ -118,10 +124,10 @@ export const AddressInfoDropdown = ({ address, displayName, blockExplorerAddress
               }}
             >
               <ArrowLeftOnRectangleIcon className="h-6 w-4 ml-2 sm:ml-0" /> <span>Disconnect</span>
-            </button>
-          </li>
-        </ul>
-      </details>
-    </>
+            </DropdownMenuItem>
+          </>
+        )}
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 };
