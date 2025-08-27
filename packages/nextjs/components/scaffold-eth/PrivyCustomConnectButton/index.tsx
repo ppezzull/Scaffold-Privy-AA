@@ -1,12 +1,11 @@
 "use client";
 
-import { useEffect } from "react";
 import { Button } from "../../ui/button";
 import { Balance } from "../Balance";
 import { AddressInfoDropdown } from "./AddressInfoDropdown";
 import { AddressQRCodeModal } from "./AddressQRCodeModal";
 import { WrongNetworkDropdown } from "./WrongNetworkDropdown";
-import { useConnectOrCreateWallet, useConnectWallet, usePrivy } from "@privy-io/react-auth";
+import { useConnectOrCreateWallet, usePrivy } from "@privy-io/react-auth";
 import { Address } from "viem";
 import { useAccount } from "wagmi";
 import { useNetworkColor } from "~~/hooks/scaffold-eth";
@@ -22,15 +21,7 @@ export const PrivyCustomConnectButton = () => {
   const { connectOrCreateWallet } = useConnectOrCreateWallet({
     onError: err => console.error("Wallet connection failed", err),
   });
-  const { connectWallet } = useConnectWallet({
-    onError: err => console.error("Wallet reconnect failed", err),
-  });
-  // If Privy is authenticated but wagmi isn't connected yet, auto-connect
-  useEffect(() => {
-    if (ready && authenticated && !isConnected) {
-      connectWallet();
-    }
-  }, [ready, authenticated, isConnected, connectWallet]);
+  // keep behavior aligned with working branch: let the user initiate connect/create explicitly
 
   const blockExplorerAddressLink = address ? getBlockExplorerAddressLink(targetNetwork, address) : undefined;
 
@@ -42,17 +33,13 @@ export const PrivyCustomConnectButton = () => {
     );
   }
 
-  if (!isConnected || !address || !chain) {
+  if (!authenticated || !isConnected || !address || !chain) {
     return (
       <Button
         size="sm"
         className="rounded-full font-bold cursor-pointer hover:brightness-90 active:brightness-75 transition duration-150"
         onClick={() => {
-          if (!authenticated) {
-            connectOrCreateWallet();
-          } else {
-            connectWallet();
-          }
+          connectOrCreateWallet();
         }}
         type="button"
       >
