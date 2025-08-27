@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -10,7 +10,7 @@ import { NavigationMenu, NavigationMenuItem, NavigationMenuLink, NavigationMenuL
 import { usePrivy } from "@privy-io/react-auth";
 import { hardhat } from "viem/chains";
 import { useAccount } from "wagmi";
-import { Bars3Icon, BugAntIcon } from "@heroicons/react/24/outline";
+import { Bars3Icon, BugAntIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import { FaucetButton, PrivyCustomConnectButton } from "~~/components/scaffold-eth";
 import { useTargetNetwork } from "~~/hooks/scaffold-eth";
 import { cn } from "~~/lib/utils";
@@ -31,6 +31,11 @@ export const menuLinks: HeaderMenuLink[] = [
     href: "/debug",
     icon: <BugAntIcon className="h-4 w-4 text-[var(--card-foreground)]" />,
   },
+  {
+    label: "Block Explorer",
+    href: "/blockexplorer",
+    icon: <MagnifyingGlassIcon className="h-4 w-4 text-[var(--card-foreground)]" />,
+  },
 ];
 
 /**
@@ -38,7 +43,12 @@ export const menuLinks: HeaderMenuLink[] = [
  */
 export const Header = () => {
   const { targetNetwork } = useTargetNetwork();
-  const isLocalNetwork = targetNetwork.id === hardhat.id;
+  // hide local-network-only items while targetNetwork is undefined/loading
+  const isLocalNetwork = targetNetwork?.id === hardhat.id;
+
+  // avoid hydration mismatches: only show network-dependent UI after mount
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
   const { authenticated } = usePrivy();
   const { isConnected } = useAccount();
 
@@ -58,16 +68,22 @@ export const Header = () => {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-52">
-                {menuLinks.map(({ label, href, icon }) => (
-                  <DropdownMenuItem key={href} asChild>
-                    <Link href={href} className="flex items-center">
-                      <span className="flex items-center gap-2">
-                        {icon && <span className="flex-shrink-0">{icon}</span>}
-                        <span>{label}</span>
-                      </span>
-                    </Link>
-                  </DropdownMenuItem>
-                ))}
+                {menuLinks
+                  .filter(({ href }) => {
+                    // show block explorer only when mounted and on local network
+                    if (href === "/blockexplorer" && !(mounted && isLocalNetwork)) return false;
+                    return true;
+                  })
+                  .map(({ label, href, icon }) => (
+                    <DropdownMenuItem key={href} asChild>
+                      <Link href={href} className="flex items-center">
+                        <span className="flex items-center gap-2">
+                          {icon && <span className="flex-shrink-0">{icon}</span>}
+                          <span>{label}</span>
+                        </span>
+                      </Link>
+                    </DropdownMenuItem>
+                  ))}
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
@@ -88,24 +104,30 @@ export const Header = () => {
         <div className="hidden lg:flex flex-1 items-center justify-start lg:ml-3">
           <NavigationMenu>
             <NavigationMenuList className="gap-2">
-              {menuLinks.map(({ label, href, icon }) => {
-                const isActive = pathname === href;
-                return (
-                  <NavigationMenuItem key={href}>
-                    <NavigationMenuLink
-                      asChild
-                      className={cn("px-3 py-1.5 rounded-full gap-2", isActive && "bg-secondary shadow")}
-                    >
-                      <Link href={href} className="flex items-center">
-                        <span className="flex items-center gap-2">
-                          {icon && <span className="flex-shrink-0">{icon}</span>}
-                          <span className="text-sm">{label}</span>
-                        </span>
-                      </Link>
-                    </NavigationMenuLink>
-                  </NavigationMenuItem>
-                );
-              })}
+              {menuLinks
+                .filter(({ href }) => {
+                  // show block explorer only on local network
+                  if (href === "/blockexplorer" && !isLocalNetwork) return false;
+                  return true;
+                })
+                .map(({ label, href, icon }) => {
+                  const isActive = pathname === href;
+                  return (
+                    <NavigationMenuItem key={href}>
+                      <NavigationMenuLink
+                        asChild
+                        className={cn("px-3 py-1.5 rounded-full gap-2", isActive && "bg-secondary shadow")}
+                      >
+                        <Link href={href} className="flex items-center">
+                          <span className="flex items-center gap-2">
+                            {icon && <span className="flex-shrink-0">{icon}</span>}
+                            <span className="text-sm">{label}</span>
+                          </span>
+                        </Link>
+                      </NavigationMenuLink>
+                    </NavigationMenuItem>
+                  );
+                })}
             </NavigationMenuList>
           </NavigationMenu>
         </div>
@@ -113,7 +135,7 @@ export const Header = () => {
         {/* Right: Actions */}
         <div className="flex items-center gap-2 mr-2 lg:mr-4">
           <PrivyCustomConnectButton />
-          {isLocalNetwork && authenticated && isConnected && <FaucetButton />}
+          {mounted && isLocalNetwork && authenticated && isConnected && <FaucetButton />}
         </div>
       </div>
     </header>

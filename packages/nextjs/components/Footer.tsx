@@ -48,7 +48,7 @@ export const Footer = () => {
         <nav className="flex justify-center items-center gap-2 text-sm w-full py-2 text-foreground">
           <div className="text-center">
             <a
-              href="https://github.com/scaffold-eth/se-2"
+              href="https://github.com/ppezzull/Scaffold-Privy-AA"
               target="_blank"
               rel="noreferrer"
               className="underline underline-offset-2 hover:opacity-80"
@@ -74,7 +74,7 @@ export const Footer = () => {
           <span>·</span>
           <div className="text-center">
             <a
-              href="https://t.me/joinchat/KByvmRe5wkR-8F_zz6AjpA"
+              href="https://t.me/ppezzu"
               target="_blank"
               rel="noreferrer"
               className="underline underline-offset-2 hover:opacity-80"
