@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { Button } from "../../ui/button";
 import { Balance } from "../Balance";
 import { AddressInfoDropdown } from "./AddressInfoDropdown";
@@ -24,6 +25,12 @@ export const PrivyCustomConnectButton = () => {
   const { connectWallet } = useConnectWallet({
     onError: err => console.error("Wallet reconnect failed", err),
   });
+  // If Privy is authenticated but wagmi isn't connected yet, auto-connect
+  useEffect(() => {
+    if (ready && authenticated && !isConnected) {
+      connectWallet();
+    }
+  }, [ready, authenticated, isConnected, connectWallet]);
 
   const blockExplorerAddressLink = address ? getBlockExplorerAddressLink(targetNetwork, address) : undefined;
 

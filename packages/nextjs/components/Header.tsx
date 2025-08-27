@@ -41,7 +41,7 @@ export const Header = () => {
   const pathname = usePathname();
 
   return (
-    <header className="sticky top-0 z-20 w-full bg-base-100 backdrop-blur">
+    <header className="sticky top-0 z-20 w-full bg-card backdrop-blur">
       <div className="mx-auto flex h-16 items-center justify-between px-2 sm:px-4">
         {/* Left: Mobile burger + Logo */}
         <div className="flex items-center gap-2">

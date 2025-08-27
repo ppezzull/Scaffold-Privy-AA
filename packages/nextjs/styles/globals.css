@@ -1,7 +1,7 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
-/* DaisyUI currently controls theming via data-theme. We'll switch fully to class strategy after component migration. */
+/* Theme variant helper tied to next-themes data-theme attribute */
 @custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
 
 @theme {
@@ -9,15 +9,9 @@
   --animate-pulse-fast: pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
-@plugin "daisyui" {
-  themes:
-    light,
-    dark --prefersdark;
-}
-
-@plugin "daisyui/theme" {
-  name: "light";
-
+/* Replaced DaisyUI plugin with local theme variables for parity */
+:root,
+[data-theme="light"] {
   --color-primary: #93bbfb;
   --color-primary-content: #212638;
   --color-secondary: #dae8ff;
@@ -40,9 +34,7 @@
   --tt-tailw: 6px;
 }
 
-@plugin "daisyui/theme" {
-  name: "dark";
-
+[data-theme="dark"] {
   --color-primary: #212638;
   --color-primary-content: #f9fbff;
   --color-secondary: #323f61;
@@ -62,7 +54,6 @@
 
   --radius-field: 9999rem;
   --radius-box: 1rem;
-
   --tt-tailw: 6px;
   --tt-bg: var(--color-primary);
 }

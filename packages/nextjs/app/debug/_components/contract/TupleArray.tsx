@@ -1,6 +1,9 @@
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { ContractInput } from "./ContractInput";
 import { getFunctionInputKey, getInitialTupleArrayFormState } from "./utilsContract";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "~~/components/ui/accordion";
+import { Badge } from "~~/components/ui/badge";
+import { Button } from "~~/components/ui/button";
 import { replacer } from "~~/utils/scaffold-eth/common";
 import { AbiParameterTuple } from "~~/utils/scaffold-eth/contract";
 
@@ -99,44 +102,45 @@ export const TupleArray = ({ abiTupleParameter, setParentForm, parentStateObject
   };
 
   return (
-    <div>
-      <div className="collapse collapse-arrow bg-base-200 pl-4 py-1.5 border-2 border-secondary">
-        <input type="checkbox" className="min-h-fit! peer" />
-        <div className="collapse-title after:top-3.5! p-0 min-h-fit! peer-checked:mb-1 text-primary-content/50">
+    <Accordion>
+      <AccordionItem className="border border-border rounded-xl">
+        <AccordionTrigger className="px-4 py-2 text-foreground/80">
           <p className="m-0 text-[1rem]">{abiTupleParameter.internalType}</p>
-        </div>
-        <div className="ml-3 flex-col space-y-2 border-secondary/70 border-l-2 pl-4 collapse-content">
-          {additionalInputs.map((additionalInput, additionalIndex) => (
-            <div key={additionalIndex} className="space-y-1">
-              <span className="badge bg-base-300 badge-sm">
-                {depth > 1 ? `${additionalIndex}` : `tuple[${additionalIndex}]`}
-              </span>
-              <div className="space-y-4">
-                {additionalInput.map((param, index) => {
-                  const key = getFunctionInputKey(
-                    `${additionalIndex}_${abiTupleParameter.name || "tuple"}`,
-                    param,
-                    index,
-                  );
-                  return (
-                    <ContractInput setForm={setForm} form={form} key={key} stateObjectKey={key} paramType={param} />
-                  );
-                })}
+        </AccordionTrigger>
+        <AccordionContent className="px-4 pb-4">
+          <div className="ml-3 flex-col space-y-2 border-border/70 border-l pl-4">
+            {additionalInputs.map((additionalInput, additionalIndex) => (
+              <div key={additionalIndex} className="space-y-1">
+                <Badge variant="secondary" size="sm">
+                  {depth > 1 ? `${additionalIndex}` : `tuple[${additionalIndex}]`}
+                </Badge>
+                <div className="space-y-4">
+                  {additionalInput.map((param, index) => {
+                    const key = getFunctionInputKey(
+                      `${additionalIndex}_${abiTupleParameter.name || "tuple"}`,
+                      param,
+                      index,
+                    );
+                    return (
+                      <ContractInput setForm={setForm} form={form} key={key} stateObjectKey={key} paramType={param} />
+                    );
+                  })}
+                </div>
               </div>
+            ))}
+            <div className="flex gap-2 pt-2">
+              <Button size="sm" variant="secondary" onClick={addInput}>
+                +
+              </Button>
+              {additionalInputs.length > 0 && (
+                <Button size="sm" variant="secondary" onClick={removeInput}>
+                  -
+                </Button>
+              )}
             </div>
-          ))}
-          <div className="flex space-x-2">
-            <button className="btn btn-sm btn-secondary" onClick={addInput}>
-              +
-            </button>
-            {additionalInputs.length > 0 && (
-              <button className="btn btn-sm btn-secondary" onClick={removeInput}>
-                -
-              </button>
-            )}
           </div>
-        </div>
-      </div>
-    </div>
+        </AccordionContent>
+      </AccordionItem>
+    </Accordion>
   );
 };
