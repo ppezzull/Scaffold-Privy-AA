@@ -22,7 +22,7 @@ export const WrongNetworkDropdown = () => {
       <DropdownMenuTrigger asChild>
         <Button size="sm" variant="destructive" className="gap-1">
           <span>Wrong network</span>
-          <ChevronDownIcon className="h-6 w-4 ml-2 sm:ml-0" />
+          <ChevronDownIcon className="h-6 w-4 ml-2 sm:ml-0 text-[var(--card-foreground)]" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="mr-2">
@@ -37,7 +37,7 @@ export const WrongNetworkDropdown = () => {
             setOpen(false);
           }}
         >
-          <ArrowLeftOnRectangleIcon className="h-6 w-4 ml-2 sm:ml-0" />
+          <ArrowLeftOnRectangleIcon className="h-6 w-4 ml-2 sm:ml-0 text-[var(--card-foreground)]" />
           <span>Disconnect</span>
         </DropdownMenuItem>
       </DropdownMenuContent>

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { parseEther } from "viem";
 import { CommonInputProps, InputBase, IntegerVariant, isValidInteger } from "~~/components/scaffold-eth";
+import { Tooltip, TooltipContent, TooltipTrigger } from "~~/components/ui/tooltip";
 
 type IntegerInputProps = CommonInputProps<string> & {
   variant?: IntegerVariant;
@@ -18,9 +19,7 @@ export const IntegerInput = ({
 }: IntegerInputProps) => {
   const [inputError, setInputError] = useState(false);
   const multiplyBy1e18 = useCallback(() => {
-    if (!value) {
-      return;
-    }
+    if (!value) return;
     return onChange(parseEther(value).toString());
   }, [onChange, value]);
 
@@ -43,18 +42,21 @@ export const IntegerInput = ({
       suffix={
         !inputError &&
         !disableMultiplyBy1e18 && (
-          <div
-            className="space-x-4 flex tooltip tooltip-top tooltip-secondary before:content-[attr(data-tip)] before:right-[-10px] before:left-auto before:transform-none"
-            data-tip="Multiply by 1e18 (wei)"
-          >
-            <button
-              className={`${disabled ? "cursor-not-allowed" : "cursor-pointer"} font-semibold px-4 text-accent`}
-              onClick={multiplyBy1e18}
-              disabled={disabled}
-              type="button"
-            >
-              ∗
-            </button>
+          <div className="flex items-center px-2">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  className={`${disabled ? "opacity-60 cursor-not-allowed" : "cursor-pointer"} font-semibold px-3 text-accent/90 hover:text-accent`}
+                  onClick={multiplyBy1e18}
+                  disabled={disabled}
+                  type="button"
+                  aria-label="multiply-by-1e18"
+                >
+                  ∗
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>Multiply by 1e18 (wei)</TooltipContent>
+            </Tooltip>
           </div>
         )
       }

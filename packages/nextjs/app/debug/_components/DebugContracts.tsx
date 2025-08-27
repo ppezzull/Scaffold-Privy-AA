@@ -54,7 +54,7 @@ export function DebugContracts() {
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <span>
-                          <BarsArrowUpIcon className="h-4 w-4 cursor-pointer ml-2" />
+                          <BarsArrowUpIcon className="h-4 w-4 cursor-pointer ml-2 text-[var(--card-foreground)]" />
                         </span>
                       </TooltipTrigger>
                       <TooltipContent>External contract</TooltipContent>

@@ -66,7 +66,7 @@ const NumberDisplay = ({ value }: { value: bigint }) => {
         <TooltipTrigger asChild>
           <span className="ml-2">
             <Button variant="ghost" size="icon" className="h-5 w-5 p-0" onClick={() => setIsEther(!isEther)}>
-              <ArrowsRightLeftIcon className="h-3 w-3 opacity-65" />
+              <ArrowsRightLeftIcon className="h-3 w-3 opacity-65 text-[var(--card-foreground)]" />
             </Button>
           </span>
         </TooltipTrigger>

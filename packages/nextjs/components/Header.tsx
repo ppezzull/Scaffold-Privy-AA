@@ -7,7 +7,9 @@ import { usePathname } from "next/navigation";
 import { Button } from "./ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "./ui/dropdown-menu";
 import { NavigationMenu, NavigationMenuItem, NavigationMenuLink, NavigationMenuList } from "./ui/navigation-menu";
+import { usePrivy } from "@privy-io/react-auth";
 import { hardhat } from "viem/chains";
+import { useAccount } from "wagmi";
 import { Bars3Icon, BugAntIcon } from "@heroicons/react/24/outline";
 import { FaucetButton, PrivyCustomConnectButton } from "~~/components/scaffold-eth";
 import { useTargetNetwork } from "~~/hooks/scaffold-eth";
@@ -27,7 +29,7 @@ export const menuLinks: HeaderMenuLink[] = [
   {
     label: "Debug Contracts",
     href: "/debug",
-    icon: <BugAntIcon className="h-4 w-4 text-[var(--color-base-content)]" />,
+    icon: <BugAntIcon className="h-4 w-4 text-[var(--card-foreground)]" />,
   },
 ];
 
@@ -37,6 +39,8 @@ export const menuLinks: HeaderMenuLink[] = [
 export const Header = () => {
   const { targetNetwork } = useTargetNetwork();
   const isLocalNetwork = targetNetwork.id === hardhat.id;
+  const { authenticated } = usePrivy();
+  const { isConnected } = useAccount();
 
   const pathname = usePathname();
 
@@ -50,7 +54,7 @@ export const Header = () => {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" aria-label="Open menu">
-                  <Bars3Icon className="h-6 w-6 text-[var(--color-base-content)]" stroke="currentColor" />
+                  <Bars3Icon className="h-6 w-6 text-[var(--card-foreground)]" stroke="currentColor" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-52">
@@ -109,7 +113,7 @@ export const Header = () => {
         {/* Right: Actions */}
         <div className="flex items-center gap-2 mr-2 lg:mr-4">
           <PrivyCustomConnectButton />
-          {isLocalNetwork && <FaucetButton />}
+          {isLocalNetwork && authenticated && isConnected && <FaucetButton />}
         </div>
       </div>
     </header>

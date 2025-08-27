@@ -50,7 +50,7 @@ export const AddressInfoDropdown = ({ address, displayName, blockExplorerAddress
           <span className="ml-2 mr-1">
             {isENS(displayName) ? displayName : checkSumAddress?.slice(0, 6) + "..." + checkSumAddress?.slice(-4)}
           </span>
-          <ChevronDownIcon className="h-6 w-4 ml-2 sm:ml-0" />
+          <ChevronDownIcon className="h-6 w-4 ml-2 sm:ml-0 text-[var(--card-foreground)]" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="z-20 p-1 mt-1">
@@ -62,7 +62,8 @@ export const AddressInfoDropdown = ({ address, displayName, blockExplorerAddress
             }}
             className="flex gap-3"
           >
-            <ArrowsRightLeftIcon className="h-6 w-4 ml-2 sm:ml-0" /> <span>Switch Network</span>
+            <ArrowsRightLeftIcon className="h-6 w-4 ml-2 sm:ml-0 text-[var(--card-foreground)]" />
+            <span>Switch Network</span>
           </DropdownMenuItem>
         )}
         <NetworkOptions
@@ -77,12 +78,18 @@ export const AddressInfoDropdown = ({ address, displayName, blockExplorerAddress
             <DropdownMenuItem className="flex gap-3" onClick={() => copyAddressToClipboard(checkSumAddress)}>
               {isAddressCopiedToClipboard ? (
                 <>
-                  <CheckCircleIcon className="text-xl font-normal h-6 w-4 ml-2 sm:ml-0" aria-hidden="true" />
+                  <CheckCircleIcon
+                    className="text-xl font-normal h-6 w-4 ml-2 sm:ml-0 text-[var(--card-foreground)]"
+                    aria-hidden="true"
+                  />
                   <span className="whitespace-nowrap">Copied!</span>
                 </>
               ) : (
                 <>
-                  <DocumentDuplicateIcon className="text-xl font-normal h-6 w-4 ml-2 sm:ml-0" aria-hidden="true" />
+                  <DocumentDuplicateIcon
+                    className="text-xl font-normal h-6 w-4 ml-2 sm:ml-0 text-[var(--card-foreground)]"
+                    aria-hidden="true"
+                  />
                   <span className="whitespace-nowrap">Copy address</span>
                 </>
               )}
@@ -94,7 +101,7 @@ export const AddressInfoDropdown = ({ address, displayName, blockExplorerAddress
                 rel="noopener noreferrer"
                 className="whitespace-nowrap"
               >
-                <ArrowTopRightOnSquareIcon className="h-6 w-4 ml-2 sm:ml-0" />
+                <ArrowTopRightOnSquareIcon className="h-6 w-4 ml-2 sm:ml-0 text-[var(--card-foreground)]" />
                 View on Block Explorer
               </a>
             </DropdownMenuItem>
@@ -110,7 +117,8 @@ export const AddressInfoDropdown = ({ address, displayName, blockExplorerAddress
                 }
               }}
             >
-              <ArrowLeftOnRectangleIcon className="h-6 w-4 ml-2 sm:ml-0" /> <span>Disconnect</span>
+              <ArrowLeftOnRectangleIcon className="h-6 w-4 ml-2 sm:ml-0 text-[var(--card-foreground)]" />
+              <span>Disconnect</span>
             </DropdownMenuItem>
           </>
         )}

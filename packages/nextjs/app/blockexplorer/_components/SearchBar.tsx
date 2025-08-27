@@ -42,6 +42,7 @@ export const SearchBar = () => {
           value={searchInput}
           placeholder="Search by hash or address"
           onChange={e => setSearchInput(e.target.value)}
+          className={` px-4 py-2 bg-[var(--color-base-100)] text-[var(--card-foreground)] placeholder:text-[var(--card-foreground)] placeholder:opacity-70 shadow-sm border border-[var(--border)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)]`}
         />
       </div>
       <Button size="sm" type="submit">

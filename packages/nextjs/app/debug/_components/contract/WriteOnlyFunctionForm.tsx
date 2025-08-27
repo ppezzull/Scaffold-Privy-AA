@@ -14,6 +14,7 @@ import {
   transformAbiFunction,
 } from "~~/app/debug/_components/contract";
 import { IntegerInput } from "~~/components/scaffold-eth";
+import { Tooltip, TooltipContent, TooltipTrigger } from "~~/components/ui/tooltip";
 import { useTransactor } from "~~/hooks/scaffold-eth";
 import { useTargetNetwork } from "~~/hooks/scaffold-eth/useTargetNetwork";
 import { AllowedChainIds } from "~~/utils/scaffold-eth";
@@ -125,17 +126,22 @@ export const WriteOnlyFunctionForm = ({
           {!zeroInputs && (
             <div className="grow basis-0">{displayedTxResult ? <TxReceipt txResult={displayedTxResult} /> : null}</div>
           )}
-          <div
-            className={`flex ${
-              writeDisabled &&
-              "tooltip tooltip-bottom tooltip-secondary before:content-[attr(data-tip)] before:-translate-x-1/3 before:left-auto before:transform-none"
-            }`}
-            data-tip={`${writeDisabled && "Wallet not connected or in the wrong network"}`}
-          >
-            <button className="btn btn-secondary btn-sm" disabled={writeDisabled || isPending} onClick={handleWrite}>
-              {isPending && <span className="loading loading-spinner loading-xs"></span>}
-              Send 💸
-            </button>
+          <div className="flex">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div>
+                  <button
+                    className="btn btn-secondary btn-sm"
+                    disabled={writeDisabled || isPending}
+                    onClick={handleWrite}
+                  >
+                    {isPending && <span className="loading loading-spinner loading-xs"></span>}
+                    Send 💸
+                  </button>
+                </div>
+              </TooltipTrigger>
+              {writeDisabled && <TooltipContent>Wallet not connected or in the wrong network</TooltipContent>}
+            </Tooltip>
           </div>
         </div>
       </div>

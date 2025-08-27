@@ -32,6 +32,16 @@ export const PrivyCustomConnectButton = () => {
     );
   }
 
+  // Prevent flash: if Privy reports authenticated but wagmi isn't yet connected,
+  // show a disabled 'Connecting…' state until wagmi finishes connecting.
+  if (authenticated && !isConnected) {
+    return (
+      <Button disabled size="sm" className="rounded-full font-bold">
+        Connecting…
+      </Button>
+    );
+  }
+
   if (!authenticated || !isConnected || !address || !chain) {
     return (
       <Button

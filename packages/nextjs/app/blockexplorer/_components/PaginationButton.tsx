@@ -26,7 +26,7 @@ export const PaginationButton = ({ currentPage, totalItems, setCurrentPage }: Pa
         disabled={prevDisabled}
         onClick={() => setCurrentPage(currentPage - 1)}
       >
-        <ArrowLeftIcon className="h-4 w-4" />
+        <ArrowLeftIcon className="h-4 w-4 text-[var(--card-foreground)]" />
       </Button>
       <span className="self-center text-foreground font-medium">Page {currentPage + 1}</span>
       <Button
@@ -35,7 +35,7 @@ export const PaginationButton = ({ currentPage, totalItems, setCurrentPage }: Pa
         disabled={nextDisabled}
         onClick={() => setCurrentPage(currentPage + 1)}
       >
-        <ArrowRightIcon className="h-4 w-4" />
+        <ArrowRightIcon className="h-4 w-4 text-[var(--card-foreground)]" />
       </Button>
     </div>
   );

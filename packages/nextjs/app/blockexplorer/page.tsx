@@ -77,10 +77,16 @@ const BlockExplorer: NextPage = () => {
   }, [hasError]);
 
   return (
-    <div className="container mx-auto my-10">
-      <SearchBar />
-      <TransactionsTable blocks={blocks} transactionReceipts={transactionReceipts} />
-      <PaginationButton currentPage={currentPage} totalItems={Number(totalBlocks)} setCurrentPage={setCurrentPage} />
+    <div className="container mx-auto my-10 max-w-6xl">
+      <div className="px-4">
+        <SearchBar />
+      </div>
+      <div className="mt-6">
+        <TransactionsTable blocks={blocks} transactionReceipts={transactionReceipts} />
+      </div>
+      <div className="mt-4">
+        <PaginationButton currentPage={currentPage} totalItems={Number(totalBlocks)} setCurrentPage={setCurrentPage} />
+      </div>
     </div>
   );
 };

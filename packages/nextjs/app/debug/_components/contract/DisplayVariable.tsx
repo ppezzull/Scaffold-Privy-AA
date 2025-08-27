@@ -63,7 +63,11 @@ export const DisplayVariable = ({
       <div className="flex items-center">
         <h3 className="font-medium text-lg mb-0 break-all">{abiFunction.name}</h3>
         <Button variant="ghost" size="icon" className="h-5 w-5" onClick={async () => await refetch()}>
-          {isFetching ? <Spinner size={12} /> : <ArrowPathIcon className="h-3 w-3 cursor-pointer" aria-hidden="true" />}
+          {isFetching ? (
+            <Spinner size={12} />
+          ) : (
+            <ArrowPathIcon className="h-3 w-3 cursor-pointer text-[var(--card-foreground)]" aria-hidden="true" />
+          )}
         </Button>
         <InheritanceTooltip inheritedFrom={inheritedFrom} />
       </div>

@@ -60,7 +60,7 @@ export const FaucetButton = () => {
       <Tooltip>
         <TooltipTrigger asChild>
           <Button variant="secondary" size="sm" className="px-2 rounded-full" onClick={sendETH} disabled={loading}>
-            {!loading ? <BanknotesIcon className="h-4 w-4" /> : <Spinner size={14} />}
+            {!loading ? <BanknotesIcon className="h-4 w-4 text-[var(--card-foreground)]" /> : <Spinner size={14} />}
           </Button>
         </TooltipTrigger>
         {isBalanceZero && <TooltipContent>Grab funds from faucet</TooltipContent>}
