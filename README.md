@@ -20,7 +20,7 @@
 - 🔗 **Integration with Traditional Wallets**: Connect to Coinbase Wallet, MetaMask, and other wallet providers.
 
 
-![Debug Contracts tab](https://i.postimg.cc/d0k6fn0X/Screenshot-From-2025-08-27-22-50-15.png)
+![Debug Contracts tab](https://i.postimg.cc/9FPMjq0Q/Screenshot-From-2025-08-28-01-24-41.png)
 
 ## Requirements
 
