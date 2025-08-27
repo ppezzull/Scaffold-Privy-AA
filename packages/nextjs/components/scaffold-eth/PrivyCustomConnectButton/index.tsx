@@ -46,7 +46,7 @@ export const PrivyCustomConnectButton = () => {
     return (
       <Button
         size="sm"
-        className="rounded-full font-bold cursor-pointer hover:brightness-90 active:brightness-75 transition duration-150"
+        className="rounded-full font-bold cursor-pointer bg-[var(--color-base-300)] text-[var(--card-foreground)] border border-[var(--border)] shadow-sm hover:bg-[var(--color-base-200)]/90 active:scale-[0.98] transition"
         onClick={() => {
           connectOrCreateWallet();
         }}

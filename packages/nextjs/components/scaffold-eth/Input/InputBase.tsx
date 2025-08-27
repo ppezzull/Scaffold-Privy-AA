@@ -25,7 +25,8 @@ export const InputBase = <T extends { toString: () => string } | undefined = str
   // Use semantic tokens instead of DaisyUI utility classes; preserve rounded-full shape
   const wrapperClasses = [
     "flex items-stretch rounded-full border",
-    "border-input bg-background text-accent",
+    // Use semantic card foreground so typed text follows the theme (white in dark)
+    "border-input bg-background text-[var(--card-foreground)]",
     disabled ? "opacity-60" : "",
   ]
     .filter(Boolean)

@@ -59,7 +59,13 @@ export const FaucetButton = () => {
     <div className="ml-1">
       <Tooltip>
         <TooltipTrigger asChild>
-          <Button variant="secondary" size="sm" className="px-2 rounded-full" onClick={sendETH} disabled={loading}>
+          <Button
+            variant="secondary"
+            size="sm"
+            className="cursor-pointer px-2 rounded-full"
+            onClick={sendETH}
+            disabled={loading}
+          >
             {!loading ? <BanknotesIcon className="h-4 w-4 text-[var(--card-foreground)]" /> : <Spinner size={14} />}
           </Button>
         </TooltipTrigger>

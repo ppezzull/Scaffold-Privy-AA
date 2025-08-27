@@ -14,6 +14,8 @@ import {
   transformAbiFunction,
 } from "~~/app/debug/_components/contract";
 import { IntegerInput } from "~~/components/scaffold-eth";
+import { Button } from "~~/components/ui/button";
+import { Spinner } from "~~/components/ui/spinner";
 import { Tooltip, TooltipContent, TooltipTrigger } from "~~/components/ui/tooltip";
 import { useTransactor } from "~~/hooks/scaffold-eth";
 import { useTargetNetwork } from "~~/hooks/scaffold-eth/useTargetNetwork";
@@ -129,16 +131,20 @@ export const WriteOnlyFunctionForm = ({
           <div className="flex">
             <Tooltip>
               <TooltipTrigger asChild>
-                <div>
-                  <button
-                    className="btn btn-secondary btn-sm"
-                    disabled={writeDisabled || isPending}
-                    onClick={handleWrite}
-                  >
-                    {isPending && <span className="loading loading-spinner loading-xs"></span>}
-                    Send 💸
-                  </button>
-                </div>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  className="rounded-full px-3 py-2 border-[var(--border)] hover:bg-[var(--color-base-200)]/40 active:scale-[0.98] transition cursor-pointer"
+                  disabled={writeDisabled || isPending}
+                  onClick={handleWrite}
+                  aria-label={`Send transaction ${abiFunction.name}`}
+                >
+                  {isPending && <Spinner size={12} className="mr-1" />}
+                  <span className="font-bold">Send</span>
+                  <span className="mr-1" aria-hidden>
+                    💸
+                  </span>
+                </Button>
               </TooltipTrigger>
               {writeDisabled && <TooltipContent>Wallet not connected or in the wrong network</TooltipContent>}
             </Tooltip>

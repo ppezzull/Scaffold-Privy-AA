@@ -54,7 +54,7 @@ export const Balance = ({ address, className = "", usdMode }: BalanceProps) => {
     <Button
       variant="ghost"
       size="sm"
-      className={`flex flex-col font-normal items-center hover:bg-transparent ${className}`}
+      className={`flex flex-col font-normal items-center hover:bg-[var(--color-base-200)]/40 active:scale-[0.98] transition ${className}`}
       onClick={toggleDisplayUsdMode}
       type="button"
     >

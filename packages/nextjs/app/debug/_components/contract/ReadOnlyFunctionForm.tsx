@@ -90,15 +90,19 @@ export const ReadOnlyFunctionForm = ({
         <Button
           variant="secondary"
           size="sm"
-          className="self-end md:self-start"
+          className="self-end md:self-start rounded-full px-3 py-2 flex items-center justify-center hover:bg-[var(--color-base-200)]/40 active:scale-[0.98] transition cursor-pointer"
           onClick={async () => {
             const { data } = await refetch();
             setResult(data);
           }}
           disabled={isFetching}
+          aria-label={`Read ${abiFunction.name}`}
         >
           {isFetching && <Spinner size={16} className="mr-1" />}
-          Read 📡
+          <span className="font-bold">Read</span>
+          <span className="mr-1" aria-hidden>
+            📡
+          </span>
         </Button>
       </div>
     </div>
