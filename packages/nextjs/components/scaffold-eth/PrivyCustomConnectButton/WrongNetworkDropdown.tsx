@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Button } from "../../ui/button";
 import {
   DropdownMenu,
@@ -14,9 +15,10 @@ import { ArrowLeftOnRectangleIcon, ChevronDownIcon } from "@heroicons/react/24/o
 export const WrongNetworkDropdown = () => {
   const { disconnect } = useDisconnect();
   const { logout } = usePrivy();
+  const [open, setOpen] = useState(false);
 
   return (
-    <DropdownMenu>
+    <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger asChild>
         <Button size="sm" variant="destructive" className="gap-1">
           <span>Wrong network</span>
@@ -25,13 +27,14 @@ export const WrongNetworkDropdown = () => {
       </DropdownMenuTrigger>
       <DropdownMenuContent className="mr-2">
         {/* Network switch options */}
-        <NetworkOptions />
+        <NetworkOptions onPicked={() => setOpen(false)} />
         <DropdownMenuSeparator />
         <DropdownMenuItem
           className="text-error flex gap-3"
           onClick={async () => {
             disconnect();
             await logout();
+            setOpen(false);
           }}
         >
           <ArrowLeftOnRectangleIcon className="h-6 w-4 ml-2 sm:ml-0" />

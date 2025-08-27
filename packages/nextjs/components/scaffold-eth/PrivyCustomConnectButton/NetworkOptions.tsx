@@ -1,3 +1,4 @@
+import { DropdownMenuItem } from "../../ui/dropdown-menu";
 import { useTheme } from "next-themes";
 import { useAccount, useSwitchChain } from "wagmi";
 import { ArrowsRightLeftIcon } from "@heroicons/react/24/solid";
@@ -8,9 +9,10 @@ const allowedNetworks = getTargetNetworks();
 
 type NetworkOptionsProps = {
   hidden?: boolean;
+  onPicked?: () => void;
 };
 
-export const NetworkOptions = ({ hidden = false }: NetworkOptionsProps) => {
+export const NetworkOptions = ({ hidden = false, onPicked }: NetworkOptionsProps) => {
   const { switchChain } = useSwitchChain();
   const { chain } = useAccount();
   const { resolvedTheme } = useTheme();
@@ -21,27 +23,21 @@ export const NetworkOptions = ({ hidden = false }: NetworkOptionsProps) => {
       {allowedNetworks
         .filter(allowedNetwork => allowedNetwork.id !== chain?.id)
         .map(allowedNetwork => (
-          <li key={allowedNetwork.id} className={hidden ? "hidden" : ""}>
-            <button
-              className="menu-item btn-sm rounded-xl! flex gap-3 py-3 whitespace-nowrap"
-              type="button"
-              onClick={() => {
-                switchChain?.({ chainId: allowedNetwork.id });
-              }}
-            >
-              <ArrowsRightLeftIcon className="h-6 w-4 ml-2 sm:ml-0" />
-              <span>
-                Switch to{" "}
-                <span
-                  style={{
-                    color: getNetworkColor(allowedNetwork, isDarkMode),
-                  }}
-                >
-                  {allowedNetwork.name}
-                </span>
-              </span>
-            </button>
-          </li>
+          <DropdownMenuItem
+            key={allowedNetwork.id}
+            className={hidden ? "hidden" : "flex gap-3"}
+            onSelect={e => {
+              e.preventDefault();
+              switchChain?.({ chainId: allowedNetwork.id });
+              onPicked?.();
+            }}
+          >
+            <ArrowsRightLeftIcon className="h-6 w-4 ml-2 sm:ml-0" />
+            <span>
+              Switch to{" "}
+              <span style={{ color: getNetworkColor(allowedNetwork, isDarkMode) }}>{allowedNetwork.name}</span>
+            </span>
+          </DropdownMenuItem>
         ))}
     </>
   );

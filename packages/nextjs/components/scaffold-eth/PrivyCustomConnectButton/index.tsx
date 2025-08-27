@@ -3,7 +3,6 @@
 import { Button } from "../../ui/button";
 import { Balance } from "../Balance";
 import { AddressInfoDropdown } from "./AddressInfoDropdown";
-import { AddressQRCodeModal } from "./AddressQRCodeModal";
 import { WrongNetworkDropdown } from "./WrongNetworkDropdown";
 import { useConnectOrCreateWallet, usePrivy } from "@privy-io/react-auth";
 import { Address } from "viem";
@@ -65,7 +64,6 @@ export const PrivyCustomConnectButton = () => {
         displayName={address}
         blockExplorerAddressLink={blockExplorerAddressLink}
       />
-      <AddressQRCodeModal address={address as Address} modalId="qrcode-modal" />
     </>
   );
 };

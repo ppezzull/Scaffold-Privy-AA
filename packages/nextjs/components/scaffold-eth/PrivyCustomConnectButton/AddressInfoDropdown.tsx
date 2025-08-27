@@ -1,6 +1,5 @@
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { Button } from "../../ui/button";
-import { Dialog, DialogContent, DialogTrigger } from "../../ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -8,7 +7,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "../../ui/dropdown-menu";
-import { AddressQRCodeModal } from "./AddressQRCodeModal";
 import { NetworkOptions } from "./NetworkOptions";
 import { usePrivy } from "@privy-io/react-auth";
 import { getAddress } from "viem";
@@ -21,10 +19,9 @@ import {
   CheckCircleIcon,
   ChevronDownIcon,
   DocumentDuplicateIcon,
-  QrCodeIcon,
 } from "@heroicons/react/24/outline";
 import { isENS } from "~~/components/scaffold-eth";
-import { useCopyToClipboard, useOutsideClick } from "~~/hooks/scaffold-eth";
+import { useCopyToClipboard } from "~~/hooks/scaffold-eth";
 import { getTargetNetworks } from "~~/utils/scaffold-eth";
 
 const allowedNetworks = getTargetNetworks();
@@ -43,17 +40,11 @@ export const AddressInfoDropdown = ({ address, displayName, blockExplorerAddress
   const { copyToClipboard: copyAddressToClipboard, isCopiedToClipboard: isAddressCopiedToClipboard } =
     useCopyToClipboard();
   const [selectingNetwork, setSelectingNetwork] = useState(false);
-  const dropdownRef = useRef<HTMLDetailsElement>(null);
-
-  const closeDropdown = () => {
-    setSelectingNetwork(false);
-    dropdownRef.current?.removeAttribute("open");
-  };
-
-  useOutsideClick(dropdownRef, closeDropdown);
+  const [open, setOpen] = useState(false);
+  const closeDropdown = () => setOpen(false);
 
   return (
-    <DropdownMenu>
+    <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger asChild>
         <Button size="sm" variant="secondary" className="pr-2 shadow-md gap-0">
           <span className="ml-2 mr-1">
@@ -64,11 +55,23 @@ export const AddressInfoDropdown = ({ address, displayName, blockExplorerAddress
       </DropdownMenuTrigger>
       <DropdownMenuContent className="z-20 p-1 mt-1">
         {allowedNetworks.length > 1 && !selectingNetwork && (
-          <DropdownMenuItem onClick={() => setSelectingNetwork(true)} className="flex gap-3">
+          <DropdownMenuItem
+            onSelect={e => {
+              e.preventDefault();
+              setSelectingNetwork(true);
+            }}
+            className="flex gap-3"
+          >
             <ArrowsRightLeftIcon className="h-6 w-4 ml-2 sm:ml-0" /> <span>Switch Network</span>
           </DropdownMenuItem>
         )}
-        <NetworkOptions hidden={!selectingNetwork} />
+        <NetworkOptions
+          hidden={!selectingNetwork}
+          onPicked={() => {
+            setSelectingNetwork(false);
+            setOpen(false);
+          }}
+        />
         {!selectingNetwork && (
           <>
             <DropdownMenuItem className="flex gap-3" onClick={() => copyAddressToClipboard(checkSumAddress)}>
@@ -84,22 +87,6 @@ export const AddressInfoDropdown = ({ address, displayName, blockExplorerAddress
                 </>
               )}
             </DropdownMenuItem>
-            <Dialog>
-              <DialogTrigger asChild>
-                <DropdownMenuItem className="flex gap-3">
-                  <QrCodeIcon className="h-6 w-4 ml-2 sm:ml-0" />
-                  <span className="whitespace-nowrap">View QR Code</span>
-                </DropdownMenuItem>
-              </DialogTrigger>
-              <DialogContent>
-                <div className="space-y-3 py-6">
-                  <div className="flex flex-col items-center gap-6">
-                    {/* Using the longer address modal content from AddressQRCodeModal */}
-                    <AddressQRCodeModal address={address} modalId="qrcode-modal" />
-                  </div>
-                </div>
-              </DialogContent>
-            </Dialog>
             <DropdownMenuItem className="flex gap-3" asChild>
               <a
                 target="_blank"
