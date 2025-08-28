@@ -40,7 +40,7 @@ export const ScaffoldEthAppWithProviders = ({ children }: { children: React.Reac
     <PrivyProvider appId={scaffoldConfig.privyProjectId} config={privyConfig}>
       <QueryClientProvider client={queryClient}>
         <WagmiProvider config={wagmiConfig} reconnectOnMount={false}>
-          <ProgressBar height="3px" color="#2299dd" />
+          <ProgressBar height="3px" color="#2299dd" options={{ showSpinner: false }} />
           <ScaffoldEthApp>{children}</ScaffoldEthApp>
         </WagmiProvider>
       </QueryClientProvider>

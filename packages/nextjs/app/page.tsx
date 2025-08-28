@@ -37,7 +37,7 @@ const Home: NextPage = () => {
             </code>{" "}
             in{" "}
             <code className="italic bg-[var(--color-base-300)] text-foreground font-bold max-w-full break-words break-all inline-block">
-              packages/foundry/contracts
+              packages/hardhat/contracts
             </code>
           </p>
         </div>

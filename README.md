@@ -3,13 +3,13 @@
 [![docs](https://img.shields.io/badge/Scaffold-Docs-blue)](https://docs.scaffoldeth.io)
 [![privy](https://img.shields.io/badge/Privy-privy.io-9cf)](https://privy.io)
 [![shadcn](https://img.shields.io/badge/Shadcn-shadcn%2Fui-purple)](https://ui.shadcn.com)
-[![foundry](https://img.shields.io/badge/Foundry-getfoundry.sh-ff7f50)](https://getfoundry.sh)
+[![hardhat](https://img.shields.io/badge/Hardhat-hardhat.org-ff7f50)](https://hardhat.org)
 [![nextjs](https://img.shields.io/badge/Next.js-nextjs.org-black)](https://nextjs.org)
 
 🧪 An open-source, up-to-date toolkit for building decentralized applications (dapps) on the Ethereum blockchain with seamless onboarding through Privy's social login and account abstraction. It's designed to make it easier for developers to create and deploy smart contracts and build user interfaces that interact with those contracts without requiring users to have a traditional wallet or understand blockchain complexities.
 
 
-⚙️ Built using NextJS, Shadcn, Privy, Foundry, Wagmi, Viem, and Typescript.
+⚙️ Built using NextJS, Shadcn, Privy, Hardhat, Wagmi, Viem, and Typescript.
 
 - ✅ **Contract Hot Reload**: Your frontend auto-adapts to your smart contract as you edit it.
 - 🪝 **[Custom hooks](https://docs.scaffoldeth.io/hooks/)**: Collection of React hooks wrapping [wagmi](https://wagmi.sh/) to simplify interactions with smart contracts with TypeScript autocompletion.
@@ -56,7 +56,7 @@ yarn install
 yarn chain
 ```
 
-This command starts a local Ethereum network using Foundry. The network runs on your local machine and can be used for testing and development. You can customize the network configuration in `packages/foundry/foundry.toml`.
+This command starts a local Ethereum network using Hardhat. The network runs on your local machine and can be used for testing and development. You can customize the network configuration in `packages/hardhat/hardhat.config.ts`.
 
 4. On a second terminal, deploy the test contract:
 
@@ -64,7 +64,7 @@ This command starts a local Ethereum network using Foundry. The network runs on 
 yarn deploy
 ```
 
-This command deploys a test smart contract to the local network. The contract is located in `packages/foundry/contracts` and can be modified to suit your needs. The `yarn deploy` command uses the deploy script located in `packages/foundry/script` to deploy the contract to the network. You can also customize the deploy script.
+This command deploys a test smart contract to the local network. The contract is located in `packages/hardhat/contracts` and can be modified to suit your needs. The `yarn deploy` command uses the deploy script located in `packages/hardhat/deploy` to deploy the contract to the network. You can also customize the deploy script.
 
 5. On a third terminal, start your NextJS app:
 
@@ -76,11 +76,11 @@ Visit your app on: `http://localhost:3000`. You can interact with your smart con
 
 **Important**: Make sure to set up both your Alchemy API key (optional if only using localhost) and Privy project ID in the `.env.local` file. The Alchemy API key is required to access public Ethereum networks, and the Privy project ID is needed for social login functionality. Without these, your dApp may not work as expected.
 
-Run smart contract test with `yarn foundry:test`
+- Run smart contract tests with `yarn hardhat:test`
 
-- Edit your smart contracts in `packages/foundry/contracts`
+- Edit your smart contracts in `packages/hardhat/contracts`
 - Edit your frontend homepage at `packages/nextjs/app/page.tsx`. For guidance on [routing](https://nextjs.org/docs/app/building-your-application/routing/defining-routes) and configuring [pages/layouts](https://nextjs.org/docs/app/building-your-application/routing/pages-and-layouts) checkout the Next.js documentation.
-- Edit your deployment scripts in `packages/foundry/script`
+- Edit your deployment scripts in `packages/hardhat/deploy`
 - Customize your Privy configuration in `components/PrivyConnector.tsx`
 
 
