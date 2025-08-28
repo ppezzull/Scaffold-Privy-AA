@@ -14,8 +14,12 @@ import {
   transformAbiFunction,
 } from "~~/app/debug/_components/contract";
 import { IntegerInput } from "~~/components/scaffold-eth";
+import { Button } from "~~/components/ui/button";
+import { Spinner } from "~~/components/ui/spinner";
+import { Tooltip, TooltipContent, TooltipTrigger } from "~~/components/ui/tooltip";
 import { useTransactor } from "~~/hooks/scaffold-eth";
 import { useTargetNetwork } from "~~/hooks/scaffold-eth/useTargetNetwork";
+import { AllowedChainIds } from "~~/utils/scaffold-eth";
 import { simulateContractWriteAndNotifyError } from "~~/utils/scaffold-eth/contract";
 
 type WriteOnlyFunctionFormProps = {
@@ -35,7 +39,7 @@ export const WriteOnlyFunctionForm = ({
 }: WriteOnlyFunctionFormProps) => {
   const [form, setForm] = useState<Record<string, any>>(() => getInitialFormState(abiFunction));
   const [txValue, setTxValue] = useState<string>("");
-  const { chain, address: account } = useAccount();
+  const { chain } = useAccount();
   const writeTxn = useTransactor();
   const { targetNetwork } = useTargetNetwork();
   const writeDisabled = !chain || chain?.id !== targetNetwork.id;
@@ -53,10 +57,12 @@ export const WriteOnlyFunctionForm = ({
           abi: abi,
           args: getParsedContractFunctionArgs(form),
           value: BigInt(txValue),
-          chain: targetNetwork,
-          account,
         };
-        await simulateContractWriteAndNotifyError({ wagmiConfig, writeContractParams: writeContractObj });
+        await simulateContractWriteAndNotifyError({
+          wagmiConfig,
+          writeContractParams: writeContractObj,
+          chainId: targetNetwork.id as AllowedChainIds,
+        });
 
         const makeWriteWithParams = () => writeContractAsync(writeContractObj);
         await writeTxn(makeWriteWithParams);
@@ -72,11 +78,7 @@ export const WriteOnlyFunctionForm = ({
     hash: result,
   });
   useEffect(() => {
-    if (txResult && (txResult as TransactionReceipt).blockHash) {
-      setDisplayedTxResult(txResult as TransactionReceipt);
-    } else {
-      setDisplayedTxResult(undefined);
-    }
+    setDisplayedTxResult(txResult);
   }, [txResult]);
 
   // TODO use `useMemo` to optimize also update in ReadOnlyFunctionForm
@@ -126,23 +128,32 @@ export const WriteOnlyFunctionForm = ({
           {!zeroInputs && (
             <div className="grow basis-0">{displayedTxResult ? <TxReceipt txResult={displayedTxResult} /> : null}</div>
           )}
-          <div
-            className={`flex ${
-              writeDisabled &&
-              "tooltip tooltip-bottom tooltip-secondary before:content-[attr(data-tip)] before:-translate-x-1/3 before:left-auto before:transform-none"
-            }`}
-            data-tip={`${writeDisabled && "Wallet not connected or in the wrong network"}`}
-          >
-            <button className="btn btn-secondary btn-sm" disabled={writeDisabled || isPending} onClick={handleWrite}>
-              {isPending && <span className="loading loading-spinner loading-xs"></span>}
-              Send 💸
-            </button>
+          <div className="flex">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  className="rounded-full px-3 py-2 border-[var(--border)] hover:bg-[var(--color-base-200)]/40 active:scale-[0.98] transition cursor-pointer"
+                  disabled={writeDisabled || isPending}
+                  onClick={handleWrite}
+                  aria-label={`Send transaction ${abiFunction.name}`}
+                >
+                  {isPending && <Spinner size={12} className="mr-1" />}
+                  <span className="font-bold">Send</span>
+                  <span className="mr-1" aria-hidden>
+                    💸
+                  </span>
+                </Button>
+              </TooltipTrigger>
+              {writeDisabled && <TooltipContent>Wallet not connected or in the wrong network</TooltipContent>}
+            </Tooltip>
           </div>
         </div>
       </div>
-      {zeroInputs && txResult && (txResult as TransactionReceipt).blockHash ? (
+      {zeroInputs && txResult ? (
         <div className="grow basis-0">
-          <TxReceipt txResult={txResult as TransactionReceipt} />
+          <TxReceipt txResult={txResult} />
         </div>
       ) : null}
     </div>

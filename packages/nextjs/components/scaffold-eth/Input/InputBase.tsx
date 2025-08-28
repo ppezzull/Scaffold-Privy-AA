@@ -1,5 +1,6 @@
 import { ChangeEvent, FocusEvent, ReactNode, useCallback, useEffect, useRef } from "react";
 import { CommonInputProps } from "~~/components/scaffold-eth";
+import { Input } from "~~/components/ui/input";
 
 type InputBaseProps<T> = CommonInputProps<T> & {
   error?: boolean;
@@ -21,12 +22,15 @@ export const InputBase = <T extends { toString: () => string } | undefined = str
 }: InputBaseProps<T>) => {
   const inputReft = useRef<HTMLInputElement>(null);
 
-  let modifier = "";
-  if (error) {
-    modifier = "border-error";
-  } else if (disabled) {
-    modifier = "border-disabled bg-base-300";
-  }
+  // Use semantic tokens instead of DaisyUI utility classes; preserve rounded-full shape
+  const wrapperClasses = [
+    "flex items-stretch rounded-full border",
+    // Use semantic card foreground so typed text follows the theme (white in dark)
+    "border-input bg-background text-[var(--card-foreground)]",
+    disabled ? "opacity-60" : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
 
   const handleChange = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => {
@@ -47,10 +51,10 @@ export const InputBase = <T extends { toString: () => string } | undefined = str
   }, [reFocus]);
 
   return (
-    <div className={`flex border-2 border-base-300 bg-base-200 rounded-full text-accent ${modifier}`}>
+    <div className={wrapperClasses}>
       {prefix}
-      <input
-        className="input input-ghost focus-within:border-transparent focus:outline-hidden focus:bg-transparent h-[2.2rem] min-h-[2.2rem] px-4 border w-full font-medium placeholder:text-accent/70 text-base-content/70 focus:text-base-content/70"
+      <Input
+        className="h-[2.2rem] min-h-[2.2rem] rounded-full border-0 focus-visible:ring-[3px] px-4"
         placeholder={placeholder}
         name={name}
         value={value?.toString()}
@@ -59,6 +63,7 @@ export const InputBase = <T extends { toString: () => string } | undefined = str
         autoComplete="off"
         ref={inputReft}
         onFocus={onFocus}
+        aria-invalid={error ? true : undefined}
       />
       {suffix}
     </div>

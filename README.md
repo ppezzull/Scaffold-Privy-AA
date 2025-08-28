@@ -1,38 +1,26 @@
 # 🏗 Scaffold-Privy-AA
 
-<h4 align="center">
-  <a href="https://docs.scaffoldeth.io">Scaffold Documentation</a> |
-  <a href="https://privy.io">Privy</a>
-</h4>
+[![docs](https://img.shields.io/badge/Scaffold-Docs-blue)](https://docs.scaffoldeth.io)
+[![privy](https://img.shields.io/badge/Privy-privy.io-9cf)](https://privy.io)
+[![shadcn](https://img.shields.io/badge/Shadcn-shadcn%2Fui-purple)](https://ui.shadcn.com)
+[![foundry](https://img.shields.io/badge/Foundry-getfoundry.sh-ff7f50)](https://getfoundry.sh)
+[![nextjs](https://img.shields.io/badge/Next.js-nextjs.org-black)](https://nextjs.org)
 
 🧪 An open-source, up-to-date toolkit for building decentralized applications (dapps) on the Ethereum blockchain with seamless onboarding through Privy's social login and account abstraction. It's designed to make it easier for developers to create and deploy smart contracts and build user interfaces that interact with those contracts without requiring users to have a traditional wallet or understand blockchain complexities.
 
-> This template was developed for the napulETH Hackathon 2025: https://taikai.network/napulETH/hackathons/napuleth2025
 
-⚙️ Built using NextJS, Privy, Foundry, Wagmi, Viem, and Typescript.
+⚙️ Built using NextJS, Shadcn, Privy, Foundry, Wagmi, Viem, and Typescript.
 
 - ✅ **Contract Hot Reload**: Your frontend auto-adapts to your smart contract as you edit it.
-- 🪝 **[Custom hooks](https://docs.scaffoldeth.io/hooks/)**: Collection of React hooks wrapper around [wagmi](https://wagmi.sh/) to simplify interactions with smart contracts with typescript autocompletion.
-- 🧱 [**Components**](https://docs.scaffoldeth.io/components/): Collection of common web3 components to quickly build your frontend.
-- � **Social Login with Privy**: Allow users to log in with email, Google, Discord, Telegram and other social accounts.
-- 🔐 **Account Abstraction**: Privy assigns users a smart wallet they can access with social login or connect their pre-existing wallet.
-- 🔐 **Integration with Traditional Wallets**: Connect to Coinbase Wallet, MetaMask, and other wallet providers.
+- 🪝 **[Custom hooks](https://docs.scaffoldeth.io/hooks/)**: Collection of React hooks wrapping [wagmi](https://wagmi.sh/) to simplify interactions with smart contracts with TypeScript autocompletion.
+- 🧱 **Components**: Collection of common web3 components to quickly build your frontend.
+- 🎨 **shadcn UI**: Prebuilt, customizable UI components and design patterns using [shadcn/ui](https://ui.shadcn.com) (Tailwind + Radix) to speed up building consistent, accessible interfaces.
+- 👥 **Social Login with Privy**: Allow users to log in with email, Google, Discord, Telegram and other social accounts.
+- 🪙 **Account Abstraction**: Privy assigns users a smart wallet they can access via social login or by connecting an existing wallet.
+- 🔗 **Integration with Traditional Wallets**: Connect to Coinbase Wallet, MetaMask, and other wallet providers.
 
-![Debug Contracts tab](https://github.com/scaffold-eth/scaffold-eth-2/assets/55535804/b237af0c-5027-4849-a5c1-2e31495cccb1)
 
-## Known Issues
-
-**React `isActive` prop warning**
-
-There's a console warning that appears when executing transactions:
-
-```
-React does not recognize the `isActive` prop on a DOM element. If you intentionally want it to appear in the DOM as a custom attribute, spell it as lowercase `isactive` instead. If you accidentally passed it from a parent component, remove it from the DOM element.
-
-components/ScaffoldEthAppWithProviders.tsx (40:5) @ ScaffoldEthAppWithProviders
-```
-
-This is related to the Privy Provider implementation. While not breaking functionality, community contributions to fix this issue are welcome!
+![Debug Contracts tab](https://i.postimg.cc/9FPMjq0Q/Screenshot-From-2025-08-28-01-24-41.png)
 
 ## Requirements
 
@@ -120,24 +108,6 @@ For Privy integration, check out the [Privy documentation](https://docs.privy.io
    - Make sure "Ethereum wallets" is enabled to support MetaMask, Coinbase Wallet, etc.
    - Enable social login methods like Google, Discord, Email, etc.
 4. Configure additional customization in `components/PrivyConnector.tsx`
-
-5. If you’re using the Privy + Supabase RLS integration, also set the Supabase variables in `packages/nextjs/.env.local`:
-   ```
-   # Supabase project URL and publishable (anon) key
-   NEXT_PUBLIC_SUPABASE_URL=https://<PROJECT_ID>.supabase.co
-   NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY=your-supabase-anon-key
-
-   # Server-only private key used by Server Actions to mint short-lived Supabase JWTs
-   # Paste the PEM with real newlines (BEGIN/END). Do NOT prefix with NEXT_PUBLIC.
-   SUPABASE_JWT_PRIVATE_KEY=
-
-   # Server-only Service Role key for admin upserts (e.g., creating users by Privy DID)
-   SUPABASE_SERVICE_ROLE_KEY=
-   ```
-   Where to find these:
-   - URL and anon key: Supabase → Settings → API
-   - Private key: Supabase → Settings → API → JWT Signing Keys (enable asymmetric, e.g., RS256)
-   - Service Role key: Supabase → Settings → API → Service Role Key (server-only)
 
 ## How Privy Works in this Project
 

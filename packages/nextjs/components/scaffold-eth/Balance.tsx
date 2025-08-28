@@ -1,6 +1,7 @@
 "use client";
 
 import { Address, formatEther } from "viem";
+import { Button } from "~~/components/ui/button";
 import { useDisplayUsdMode } from "~~/hooks/scaffold-eth/useDisplayUsdMode";
 import { useTargetNetwork } from "~~/hooks/scaffold-eth/useTargetNetwork";
 import { useWatchBalance } from "~~/hooks/scaffold-eth/useWatchBalance";
@@ -19,7 +20,6 @@ export const Balance = ({ address, className = "", usdMode }: BalanceProps) => {
   const { targetNetwork } = useTargetNetwork();
   const nativeCurrencyPrice = useGlobalState(state => state.nativeCurrency.price);
   const isNativeCurrencyPriceFetching = useGlobalState(state => state.nativeCurrency.isFetching);
-
   const {
     data: balance,
     isError,
@@ -27,15 +27,14 @@ export const Balance = ({ address, className = "", usdMode }: BalanceProps) => {
   } = useWatchBalance({
     address,
   });
-
   const { displayUsdMode, toggleDisplayUsdMode } = useDisplayUsdMode({ defaultUsdMode: usdMode });
 
   if (!address || isLoading || balance === null || (isNativeCurrencyPriceFetching && nativeCurrencyPrice === 0)) {
     return (
       <div className="animate-pulse flex space-x-4">
-        <div className="rounded-md bg-slate-300 h-6 w-6"></div>
+        <div className="rounded-md bg-muted h-6 w-6"></div>
         <div className="flex items-center space-y-6">
-          <div className="h-2 w-28 bg-slate-300 rounded-sm"></div>
+          <div className="h-2 w-28 bg-muted rounded-sm"></div>
         </div>
       </div>
     );
@@ -43,8 +42,8 @@ export const Balance = ({ address, className = "", usdMode }: BalanceProps) => {
 
   if (isError) {
     return (
-      <div className="border-2 border-base-content/30 rounded-md px-2 flex flex-col items-center max-w-fit cursor-pointer">
-        <div className="text-warning">Error</div>
+      <div className="border-2 border-foreground/30 rounded-md px-2 flex flex-col items-center max-w-fit cursor-pointer">
+        <div className="text-destructive">Error</div>
       </div>
     );
   }
@@ -52,8 +51,10 @@ export const Balance = ({ address, className = "", usdMode }: BalanceProps) => {
   const formattedBalance = balance ? Number(formatEther(balance.value)) : 0;
 
   return (
-    <button
-      className={`btn btn-sm btn-ghost flex flex-col font-normal items-center hover:bg-transparent ${className}`}
+    <Button
+      variant="ghost"
+      size="sm"
+      className={`flex flex-col font-normal items-center hover:bg-[var(--color-base-200)]/40 active:scale-[0.98] transition ${className}`}
       onClick={toggleDisplayUsdMode}
       type="button"
     >
@@ -70,6 +71,6 @@ export const Balance = ({ address, className = "", usdMode }: BalanceProps) => {
           </>
         )}
       </div>
-    </button>
+    </Button>
   );
 };

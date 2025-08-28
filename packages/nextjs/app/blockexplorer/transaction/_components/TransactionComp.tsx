@@ -3,15 +3,17 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Hash, Transaction, TransactionReceipt, formatEther, formatUnits } from "viem";
-import { baseSepolia } from "viem/chains";
+import { hardhat } from "viem/chains";
 import { usePublicClient } from "wagmi";
 import { Address } from "~~/components/scaffold-eth";
+import { Badge } from "~~/components/ui/badge";
+import { Button } from "~~/components/ui/button";
 import { useTargetNetwork } from "~~/hooks/scaffold-eth/useTargetNetwork";
 import { decodeTransactionData, getFunctionDetails } from "~~/utils/scaffold-eth";
 import { replacer } from "~~/utils/scaffold-eth/common";
 
 const TransactionComp = ({ txHash }: { txHash: Hash }) => {
-  const client = usePublicClient({ chainId: baseSepolia.id });
+  const client = usePublicClient({ chainId: hardhat.id });
   const router = useRouter();
   const [transaction, setTransaction] = useState<Transaction>();
   const [receipt, setReceipt] = useState<TransactionReceipt>();
@@ -39,13 +41,13 @@ const TransactionComp = ({ txHash }: { txHash: Hash }) => {
 
   return (
     <div className="container mx-auto mt-10 mb-20 px-10 md:px-0">
-      <button className="btn btn-sm btn-primary" onClick={() => router.back()}>
+      <Button size="sm" onClick={() => router.back()}>
         Back
-      </button>
+      </Button>
       {transaction ? (
         <div className="overflow-x-auto">
-          <h2 className="text-3xl font-bold mb-4 text-center text-primary-content">Transaction Details</h2>{" "}
-          <table className="table rounded-lg bg-base-100 w-full shadow-lg md:table-lg table-md">
+          <h2 className="text-3xl font-bold mb-4 text-center text-foreground">Transaction Details</h2>{" "}
+          <table className="w-full table-auto rounded-lg bg-card text-card-foreground shadow-lg">
             <tbody>
               <tr>
                 <td>
@@ -101,7 +103,7 @@ const TransactionComp = ({ txHash }: { txHash: Hash }) => {
                     ) : (
                       <>
                         <span className="mr-2">{getFunctionDetails(transaction)}</span>
-                        <span className="badge badge-primary font-bold">{functionCalled}</span>
+                        <Badge variant="primary">{functionCalled}</Badge>
                       </>
                     )}
                   </div>
@@ -121,7 +123,7 @@ const TransactionComp = ({ txHash }: { txHash: Hash }) => {
                   <textarea
                     readOnly
                     value={transaction.input}
-                    className="p-0 w-full textarea-primary bg-inherit h-[150px]"
+                    className="p-0 w-full h-[150px] bg-transparent border rounded-md px-2 py-1"
                   />
                 </td>
               </tr>
@@ -131,15 +133,11 @@ const TransactionComp = ({ txHash }: { txHash: Hash }) => {
                 </td>
                 <td>
                   <ul>
-                    {receipt?.logs?.map((log, i) => {
-                      // Patch: assert log type to include topics
-                      const logWithTopics = log as typeof log & { topics?: string[] };
-                      return (
-                        <li key={i}>
-                          <strong>Log {i} topics:</strong> {JSON.stringify(logWithTopics.topics, replacer, 2)}
-                        </li>
-                      );
-                    })}
+                    {receipt?.logs?.map((log, i) => (
+                      <li key={i}>
+                        <strong>Log {i} topics:</strong> {JSON.stringify(log.topics, replacer, 2)}
+                      </li>
+                    ))}
                   </ul>
                 </td>
               </tr>
@@ -147,7 +145,7 @@ const TransactionComp = ({ txHash }: { txHash: Hash }) => {
           </table>
         </div>
       ) : (
-        <p className="text-2xl text-base-content">Loading...</p>
+        <p className="text-2xl text-foreground">Loading...</p>
       )}
     </div>
   );

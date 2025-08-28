@@ -1,6 +1,5 @@
 "use client";
 
-import { NetworkSwitcher } from "./NetworkSwitcher";
 import { PrivyProvider } from "@privy-io/react-auth";
 import { WagmiProvider } from "@privy-io/wagmi";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -18,10 +17,9 @@ const ScaffoldEthApp = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <>
-      <div className={`flex flex-col min-h-screen`}>
+      <div className={`flex flex-col min-h-screen `}>
         <Header />
-        <NetworkSwitcher />
-        <main className="relative flex flex-col flex-1 bg-slate-900">{children}</main>
+        <main className="relative flex flex-col flex-1">{children}</main>
         <Footer />
       </div>
       <Toaster />
@@ -42,7 +40,7 @@ export const ScaffoldEthAppWithProviders = ({ children }: { children: React.Reac
     <PrivyProvider appId={scaffoldConfig.privyProjectId} config={privyConfig}>
       <QueryClientProvider client={queryClient}>
         <WagmiProvider config={wagmiConfig} reconnectOnMount={false}>
-          <ProgressBar height="3px" color="#2299dd" />
+          <ProgressBar height="3px" color="#2299dd" options={{ showSpinner: false }} />
           <ScaffoldEthApp>{children}</ScaffoldEthApp>
         </WagmiProvider>
       </QueryClientProvider>

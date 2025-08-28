@@ -1,6 +1,8 @@
 import { useMemo, useState } from "react";
 import { ArrowsRightLeftIcon } from "@heroicons/react/24/outline";
 import { CommonInputProps, InputBase, SIGNED_NUMBER_REGEX } from "~~/components/scaffold-eth";
+import { Button } from "~~/components/ui/button";
+import { Tooltip, TooltipContent, TooltipTrigger } from "~~/components/ui/tooltip";
 import { useDisplayUsdMode } from "~~/hooks/scaffold-eth/useDisplayUsdMode";
 import { useGlobalState } from "~~/services/store/store";
 
@@ -105,23 +107,36 @@ export const EtherInput = ({
       disabled={disabled}
       prefix={<span className="pl-4 -mr-2 text-accent self-center">{displayUsdMode ? "$" : "Ξ"}</span>}
       suffix={
-        <div
-          className={`${
-            nativeCurrencyPrice > 0
-              ? ""
-              : "tooltip tooltip-secondary before:content-[attr(data-tip)] before:right-[-10px] before:left-auto before:transform-none"
-          }`}
-          data-tip={isNativeCurrencyPriceFetching ? "Fetching price" : "Unable to fetch price"}
-        >
-          <button
-            className="btn btn-primary h-[2.2rem] min-h-[2.2rem]"
+        nativeCurrencyPrice > 0 ? (
+          <Button
+            className="h-[2.2rem] min-h-[2.2rem] rounded-full"
             onClick={toggleDisplayUsdMode}
             disabled={!displayUsdMode && !nativeCurrencyPrice}
             type="button"
+            size="sm"
           >
-            <ArrowsRightLeftIcon className="h-3 w-3 cursor-pointer" aria-hidden="true" />
-          </button>
-        </div>
+            <ArrowsRightLeftIcon className="h-3 w-3" aria-hidden="true" />
+          </Button>
+        ) : (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span>
+                <Button
+                  className="h-[2.2rem] min-h-[2.2rem] rounded-full"
+                  onClick={toggleDisplayUsdMode}
+                  disabled={!displayUsdMode && !nativeCurrencyPrice}
+                  type="button"
+                  size="sm"
+                >
+                  <ArrowsRightLeftIcon className="h-3 w-3" aria-hidden="true" />
+                </Button>
+              </span>
+            </TooltipTrigger>
+            <TooltipContent>
+              {isNativeCurrencyPriceFetching ? "Fetching price" : "Unable to fetch price"}
+            </TooltipContent>
+          </Tooltip>
+        )
       }
     />
   );

@@ -12,6 +12,11 @@ export const wagmiConfig = createConfig({
     },
     {} as Record<number, ReturnType<typeof http>>,
   ),
-  connectors: [injected(), ...(projectId ? [walletConnect({ projectId })] : []), coinbaseWallet({ appName: "zkMed" })],
+  connectors: [
+    // Ensure Privy-connected wallets are recognized by wagmi
+    injected(),
+    ...(projectId ? [walletConnect({ projectId })] : []),
+    coinbaseWallet({ appName: "zkMed" }),
+  ],
   ssr: true,
 });

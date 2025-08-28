@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { isAddress, isHex } from "viem";
 import { hardhat } from "viem/chains";
 import { usePublicClient } from "wagmi";
+import { Button } from "~~/components/ui/button";
+import { Input } from "~~/components/ui/input";
 
 export const SearchBar = () => {
   const [searchInput, setSearchInput] = useState("");
@@ -34,16 +36,18 @@ export const SearchBar = () => {
 
   return (
     <form onSubmit={handleSearch} className="flex items-center justify-end mb-5 space-x-3 mx-5">
-      <input
-        className="border-primary bg-base-100 text-base-content placeholder:text-base-content/50 p-2 mr-2 w-full md:w-1/2 lg:w-1/3 rounded-md shadow-md focus:outline-hidden focus:ring-2 focus:ring-accent"
-        type="text"
-        value={searchInput}
-        placeholder="Search by hash or address"
-        onChange={e => setSearchInput(e.target.value)}
-      />
-      <button className="btn btn-sm btn-primary" type="submit">
+      <div className="w-full md:w-1/2 lg:w-1/3">
+        <Input
+          type="text"
+          value={searchInput}
+          placeholder="Search by hash or address"
+          onChange={e => setSearchInput(e.target.value)}
+          className={` px-4 py-2 bg-[var(--color-base-100)] text-[var(--card-foreground)] placeholder:text-[var(--card-foreground)] placeholder:opacity-70 shadow-sm border border-[var(--border)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)]`}
+        />
+      </div>
+      <Button size="sm" type="submit">
         Search
-      </button>
+      </Button>
     </form>
   );
 };

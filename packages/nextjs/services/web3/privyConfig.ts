@@ -11,7 +11,7 @@ export const privyConfig: PrivyClientConfig = {
   // Multiple login methods for better UX
   loginMethods: ["wallet", "email", "sms", "google"],
   appearance: {
-    showWalletLoginFirst: false, // Show social login first for embedded wallets
+    showWalletLoginFirst: true, // Show social login first for embedded wallets
     theme: "light",
   },
   // Use the first enabled chain as default (usually the target network)

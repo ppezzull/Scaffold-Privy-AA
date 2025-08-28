@@ -1,5 +1,6 @@
-import { Account, Address, Chain, Transport, getContract } from "viem";
+import { Account, Address, Chain, Client, Transport, getContract } from "viem";
 import { usePublicClient } from "wagmi";
+import { GetWalletClientReturnType } from "wagmi/actions";
 import { useSelectedNetwork } from "~~/hooks/scaffold-eth";
 import { useDeployedContractInfo } from "~~/hooks/scaffold-eth";
 import { AllowedChainIds } from "~~/utils/scaffold-eth";
@@ -13,7 +14,10 @@ import { Contract, ContractName } from "~~/utils/scaffold-eth/contract";
  * @param config.walletClient - optional walletClient from wagmi useWalletClient hook can be passed for doing write transactions
  * @param config.chainId - optional chainId that is configured with the scaffold project to make use for multi-chain interactions.
  */
-export const useScaffoldContract = <TContractName extends ContractName, TWalletClient = any>({
+export const useScaffoldContract = <
+  TContractName extends ContractName,
+  TWalletClient extends Exclude<GetWalletClientReturnType, null> | undefined,
+>({
   contractName,
   walletClient,
   chainId,
@@ -32,7 +36,19 @@ export const useScaffoldContract = <TContractName extends ContractName, TWalletC
 
   let contract = undefined;
   if (deployedContractData && publicClient) {
-    contract = getContract<Transport, Address, Contract<TContractName>["abi"], any, Chain, Account>({
+    contract = getContract<
+      Transport,
+      Address,
+      Contract<TContractName>["abi"],
+      TWalletClient extends Exclude<GetWalletClientReturnType, null>
+        ? {
+            public: Client<Transport, Chain>;
+            wallet: TWalletClient;
+          }
+        : { public: Client<Transport, Chain> },
+      Chain,
+      Account
+    >({
       address: deployedContractData.address,
       abi: deployedContractData.abi as Contract<TContractName>["abi"],
       client: {
