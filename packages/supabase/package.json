@@ -1,0 +1,17 @@
+{
+  "name": "@se-2/supabase",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "gen:signing-key": "mkdir -p out && supabase gen signing-key --algorithm ES256 > out/signing_key.json",
+    "jwk-to-pem": "node ./scripts/jwk-to-pem.mjs --jwk out/signing_key.json --out-pem out/signing_key.pem --env ../nextjs/.env",
+    "configure": "yarn gen:signing-key && yarn jwk-to-pem"
+  },
+  "dependencies": {
+    "jose": "^6.1.0",
+    "jwk-to-pem": "^2.0.5"
+  },
+  "engines": {
+    "node": ">=20.18.3"
+  }
+}

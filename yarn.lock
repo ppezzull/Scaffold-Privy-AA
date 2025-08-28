@@ -4441,14 +4441,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@reown/appkit-common@npm:1.8.0":
-  version: 1.8.0
-  resolution: "@reown/appkit-common@npm:1.8.0"
+"@reown/appkit-common@npm:1.8.1":
+  version: 1.8.1
+  resolution: "@reown/appkit-common@npm:1.8.1"
   dependencies:
     big.js: 6.2.2
     dayjs: 1.11.13
     viem: ">=2.33.3"
-  checksum: f595511604807b2f83799090ff3324a6b65ef8e6d4e61963a9062cefb0b74588240573262bde39eedb9e0647baf3e49ead9cfdeb403ec4870593c6d7116a9285
+  checksum: 105a6f5cfd74956c7e01217e9f2c3327ddcababdcde2008a153b43183a469c858b8986f510234d263b58825e5d6c72b3ef928661cc072e9996b3f7632af3780e
   languageName: node
   linkType: hard
 
@@ -4465,16 +4465,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@reown/appkit-controllers@npm:1.8.0":
-  version: 1.8.0
-  resolution: "@reown/appkit-controllers@npm:1.8.0"
+"@reown/appkit-controllers@npm:1.8.1":
+  version: 1.8.1
+  resolution: "@reown/appkit-controllers@npm:1.8.1"
   dependencies:
-    "@reown/appkit-common": 1.8.0
-    "@reown/appkit-wallet": 1.8.0
+    "@reown/appkit-common": 1.8.1
+    "@reown/appkit-wallet": 1.8.1
     "@walletconnect/universal-provider": 2.21.7
     valtio: 2.1.5
     viem: ">=2.33.3"
-  checksum: 9cd35b32e8e589c5961755737248a2930b84f0a5d8d576e1a3995e037dcaf502249b8b03727bbff6a2946dad1c07ed3d5882cb8d6d89335ce9d29c79ba4e37bf
+  checksum: d6eba889d2cffe78738ac628fbbec219aef6976297146c89b6b8709681b35a8c881e920a855cec8bdbd24efa875bcd46034fe355475dd3813090875afac1a589
   languageName: node
   linkType: hard
 
@@ -4492,17 +4492,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@reown/appkit-pay@npm:1.8.0":
-  version: 1.8.0
-  resolution: "@reown/appkit-pay@npm:1.8.0"
+"@reown/appkit-pay@npm:1.8.1":
+  version: 1.8.1
+  resolution: "@reown/appkit-pay@npm:1.8.1"
   dependencies:
-    "@reown/appkit-common": 1.8.0
-    "@reown/appkit-controllers": 1.8.0
-    "@reown/appkit-ui": 1.8.0
-    "@reown/appkit-utils": 1.8.0
+    "@reown/appkit-common": 1.8.1
+    "@reown/appkit-controllers": 1.8.1
+    "@reown/appkit-ui": 1.8.1
+    "@reown/appkit-utils": 1.8.1
     lit: 3.3.0
     valtio: 2.1.5
-  checksum: 236af1410b6fd26b07bee7fd632f0d49ac05af56eae92c6a897d8dcdc88e225bbd4b29cef707eac427690193b7ea5bdf09e8cae0d0c23e48e582b0f320650ff7
+  checksum: 6adc5dc0674b93dc29c458aff6843c08b6886fa235e47d981f4931993a61351c0ebda31c5e84f2403a0076bc8e523d9e663795e6ab9115196875d2cead0a00f4
   languageName: node
   linkType: hard
 
@@ -4515,12 +4515,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@reown/appkit-polyfills@npm:1.8.0":
-  version: 1.8.0
-  resolution: "@reown/appkit-polyfills@npm:1.8.0"
+"@reown/appkit-polyfills@npm:1.8.1":
+  version: 1.8.1
+  resolution: "@reown/appkit-polyfills@npm:1.8.1"
   dependencies:
     buffer: 6.0.3
-  checksum: 011ea5816d69202cf3f5f5d206738501ff1fbe2359ae1542c2e463001fbbab50f988fa91406a620e37b85c172bcc8b5403d769ac596cebbe6d60914fe1b1351e
+  checksum: 3796c6e619ea124270a8653360bbbea993f27984a384155c78384d6a361ba36a603659cd77ecc6b66507638a8ac689e19fc86cb3c32d550815e0a629319c5a74
   languageName: node
   linkType: hard
 
@@ -4538,17 +4538,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@reown/appkit-scaffold-ui@npm:1.8.0":
-  version: 1.8.0
-  resolution: "@reown/appkit-scaffold-ui@npm:1.8.0"
+"@reown/appkit-scaffold-ui@npm:1.8.1":
+  version: 1.8.1
+  resolution: "@reown/appkit-scaffold-ui@npm:1.8.1"
   dependencies:
-    "@reown/appkit-common": 1.8.0
-    "@reown/appkit-controllers": 1.8.0
-    "@reown/appkit-ui": 1.8.0
-    "@reown/appkit-utils": 1.8.0
-    "@reown/appkit-wallet": 1.8.0
+    "@reown/appkit-common": 1.8.1
+    "@reown/appkit-controllers": 1.8.1
+    "@reown/appkit-ui": 1.8.1
+    "@reown/appkit-utils": 1.8.1
+    "@reown/appkit-wallet": 1.8.1
     lit: 3.3.0
-  checksum: 54da3b51b0a1671d4c6a81bdf8453abd3ad2c995a9d90dfaf87831138d670115b6a83535ec688c19a07be0f85f56e417ee3cfe3e35fe9ebd356706320ab09e4d
+  checksum: 481740ab48f60987639b2420137a31f0b9f138a3ce72545beadcff3161ff93c460c9ca84e1745d979fd306172b898b44411745663b59491bffe3e1361d22dbdd
   languageName: node
   linkType: hard
 
@@ -4565,17 +4565,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@reown/appkit-ui@npm:1.8.0":
-  version: 1.8.0
-  resolution: "@reown/appkit-ui@npm:1.8.0"
+"@reown/appkit-ui@npm:1.8.1":
+  version: 1.8.1
+  resolution: "@reown/appkit-ui@npm:1.8.1"
   dependencies:
     "@phosphor-icons/webcomponents": 2.1.5
-    "@reown/appkit-common": 1.8.0
-    "@reown/appkit-controllers": 1.8.0
-    "@reown/appkit-wallet": 1.8.0
+    "@reown/appkit-common": 1.8.1
+    "@reown/appkit-controllers": 1.8.1
+    "@reown/appkit-wallet": 1.8.1
     lit: 3.3.0
     qrcode: 1.5.3
-  checksum: 10aebd495f1bd37d2925129e9afc860b175fd9a7350d9d53278f189b90abb184f5b28011b4d8481dd61ff5791a6030016c521c7e60ce9f4a2aedf671a30f54e3
+  checksum: cc0108a21768a2f560f837c5b0c9af09106516ff0ea8174f7c8d88130428655ac631f249f770f3397ee49db778f9a1e15a0aad5a7c40493258c0150667c9f06a
   languageName: node
   linkType: hard
 
@@ -4597,14 +4597,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@reown/appkit-utils@npm:1.8.0":
-  version: 1.8.0
-  resolution: "@reown/appkit-utils@npm:1.8.0"
+"@reown/appkit-utils@npm:1.8.1":
+  version: 1.8.1
+  resolution: "@reown/appkit-utils@npm:1.8.1"
   dependencies:
-    "@reown/appkit-common": 1.8.0
-    "@reown/appkit-controllers": 1.8.0
-    "@reown/appkit-polyfills": 1.8.0
-    "@reown/appkit-wallet": 1.8.0
+    "@reown/appkit-common": 1.8.1
+    "@reown/appkit-controllers": 1.8.1
+    "@reown/appkit-polyfills": 1.8.1
+    "@reown/appkit-wallet": 1.8.1
     "@wallet-standard/wallet": 1.1.0
     "@walletconnect/logger": 2.1.2
     "@walletconnect/universal-provider": 2.21.7
@@ -4612,7 +4612,7 @@ __metadata:
     viem: ">=2.33.3"
   peerDependencies:
     valtio: 2.1.5
-  checksum: 901dff9e507665c1fd2a94b24f74196286290706ea29b1b334ce2ff10af9bb8bbb489b05e1375d4d3259107e79d918050c5f60754ed25a0fcfbddec1503f2cb0
+  checksum: 88d5fd0b1a3d930cf447b7aae52482f5cebb2486592f146e0e2729493a90d7ad4c0f4779ab10fb7ff9ef7527d0b6c47fdd202041220897f9ef21d8802a6c7fdb
   languageName: node
   linkType: hard
 
@@ -4628,15 +4628,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@reown/appkit-wallet@npm:1.8.0":
-  version: 1.8.0
-  resolution: "@reown/appkit-wallet@npm:1.8.0"
+"@reown/appkit-wallet@npm:1.8.1":
+  version: 1.8.1
+  resolution: "@reown/appkit-wallet@npm:1.8.1"
   dependencies:
-    "@reown/appkit-common": 1.8.0
-    "@reown/appkit-polyfills": 1.8.0
+    "@reown/appkit-common": 1.8.1
+    "@reown/appkit-polyfills": 1.8.1
     "@walletconnect/logger": 2.1.2
     zod: 3.22.4
-  checksum: 418ea6a86b7584549622fde52e1d85a8f38ae28e0e2f6aa7bdada5537526a93e7c28e7ceef8507f1caebb5e8af1e853b95db047bef900a085be55fbfba823992
+  checksum: f71cf1bd540821b83a02475d5705ac43eca768dd27429ad938c95dfd764bfa18395bd9d2f4be7d64b3263802ac4dc26df450920886a365ffef4cc533375fc6d5
   languageName: node
   linkType: hard
 
@@ -4662,18 +4662,18 @@ __metadata:
   linkType: hard
 
 "@reown/appkit@npm:^1.7.11":
-  version: 1.8.0
-  resolution: "@reown/appkit@npm:1.8.0"
+  version: 1.8.1
+  resolution: "@reown/appkit@npm:1.8.1"
   dependencies:
     "@lit/react": 1.0.8
-    "@reown/appkit-common": 1.8.0
-    "@reown/appkit-controllers": 1.8.0
-    "@reown/appkit-pay": 1.8.0
-    "@reown/appkit-polyfills": 1.8.0
-    "@reown/appkit-scaffold-ui": 1.8.0
-    "@reown/appkit-ui": 1.8.0
-    "@reown/appkit-utils": 1.8.0
-    "@reown/appkit-wallet": 1.8.0
+    "@reown/appkit-common": 1.8.1
+    "@reown/appkit-controllers": 1.8.1
+    "@reown/appkit-pay": 1.8.1
+    "@reown/appkit-polyfills": 1.8.1
+    "@reown/appkit-scaffold-ui": 1.8.1
+    "@reown/appkit-ui": 1.8.1
+    "@reown/appkit-utils": 1.8.1
+    "@reown/appkit-wallet": 1.8.1
     "@walletconnect/universal-provider": 2.21.7
     bs58: 6.0.0
     semver: 7.7.2
@@ -4682,7 +4682,7 @@ __metadata:
   dependenciesMeta:
     "@lit/react":
       optional: true
-  checksum: 3aea994d8163c5f22f7cca98abb6ae8ba235e8bf9e5a28d51a5e4ad4a73910a4274f11a8fc4c71a66f3bf97eb5bf0ead782c0c851146956a49dce045a47257a5
+  checksum: e3f2e231e26d370c2d600a042371c4cbba5e6666ab3e18e253b586034778e76560e76b43b38ed74c952034cc0dd753b70e92ace9fd37e0d22acf2f1cfd234214
   languageName: node
   linkType: hard
 
@@ -4882,6 +4882,15 @@ __metadata:
     viem: 2.31.1
     wagmi: 2.15.6
     zustand: ~5.0.0
+  languageName: unknown
+  linkType: soft
+
+"@se-2/supabase@workspace:packages/supabase":
+  version: 0.0.0-use.local
+  resolution: "@se-2/supabase@workspace:packages/supabase"
+  dependencies:
+    jose: ^6.1.0
+    jwk-to-pem: ^2.0.5
   languageName: unknown
   linkType: soft
 
@@ -7082,6 +7091,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"asn1.js@npm:^5.3.0":
+  version: 5.4.1
+  resolution: "asn1.js@npm:5.4.1"
+  dependencies:
+    bn.js: ^4.0.0
+    inherits: ^2.0.1
+    minimalistic-assert: ^1.0.0
+    safer-buffer: ^2.1.0
+  checksum: 3786a101ac6f304bd4e9a7df79549a7561950a13d4bcaec0c7790d44c80d147c1a94ba3d4e663673406064642a40b23fcd6c82a9952468e386c1a1376d747f9a
+  languageName: node
+  linkType: hard
+
 "ast-types-flow@npm:^0.0.8":
   version: 0.0.8
   resolution: "ast-types-flow@npm:0.0.8"
@@ -7331,7 +7352,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"bn.js@npm:^4.11.9":
+"bn.js@npm:^4.0.0, bn.js@npm:^4.11.9":
   version: 4.12.2
   resolution: "bn.js@npm:4.12.2"
   checksum: dd224afda6f5a7d15f2fe5154e1a1c245576a725584ea1852c8c42f9748dfe847bc63a48b2885360023389a24cfebb3653ca97f4c69742f3c22bc63da6565030
@@ -8423,9 +8444,9 @@ __metadata:
   linkType: hard
 
 "electron-to-chromium@npm:^1.5.204":
-  version: 1.5.209
-  resolution: "electron-to-chromium@npm:1.5.209"
-  checksum: 8c9ae3a019057b8f7c88ec7ac4dfd2fb2fa4b7daf2a788585510fbae5e8f9f6efafd3a57b13215bf65fc6cb0d976ea34f01a03f9f3979c42f16ad991b8f05911
+  version: 1.5.211
+  resolution: "electron-to-chromium@npm:1.5.211"
+  checksum: 8e385c9680dd00c047eac92fba68f3fd8fc778369b3b074804183df63024c59e25bac0e5e4e0f3eba5f9b1e9c741dc159b12facd9127104aff545f135ca964f6
   languageName: node
   linkType: hard
 
@@ -8444,7 +8465,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"elliptic@npm:6.6.1":
+"elliptic@npm:6.6.1, elliptic@npm:^6.6.1":
   version: 6.6.1
   resolution: "elliptic@npm:6.6.1"
   dependencies:
@@ -10482,7 +10503,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"inherits@npm:2, inherits@npm:2.0.4, inherits@npm:^2.0.3, inherits@npm:^2.0.4, inherits@npm:~2.0.3":
+"inherits@npm:2, inherits@npm:2.0.4, inherits@npm:^2.0.1, inherits@npm:^2.0.3, inherits@npm:^2.0.4, inherits@npm:~2.0.3":
   version: 2.0.4
   resolution: "inherits@npm:2.0.4"
   checksum: 4a48a733847879d6cf6691860a6b1e3f0f4754176e4d71494c41f3475553768b10f84b5ce1d40fbd0e34e6bfbb864ee35858ad4dd2cf31e02fc4a154b724d7f1
@@ -11252,6 +11273,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"jose@npm:^6.1.0":
+  version: 6.1.0
+  resolution: "jose@npm:6.1.0"
+  checksum: f9596a3161b5dabfdd0b7d490f2710f2cc8d460b0a2e1f3262fd2f90652abbb535e4f80e80d3854e7264c9526dcdac5e28693b4d4b1803f622728d7dcde02010
+  languageName: node
+  linkType: hard
+
 "joycon@npm:^3.1.1":
   version: 3.1.1
   resolution: "joycon@npm:3.1.1"
@@ -11458,6 +11486,17 @@ __metadata:
   version: 6.0.2
   resolution: "just-diff@npm:6.0.2"
   checksum: 1a0c7524f640cb88ab013862733e710f840927834208fd3b85cbc5da2ced97acc75e7dcfe493268ac6a6514c51dd8624d2fd9d057050efba3c02b81a6dcb7ff9
+  languageName: node
+  linkType: hard
+
+"jwk-to-pem@npm:^2.0.5":
+  version: 2.0.7
+  resolution: "jwk-to-pem@npm:2.0.7"
+  dependencies:
+    asn1.js: ^5.3.0
+    elliptic: ^6.6.1
+    safe-buffer: ^5.0.1
+  checksum: 1dad940193719fa874cb226701d0723cb762a2d806f875d7651cc29de8a508069c898b3b65c7b40b3b1d7b0d26013053aa65ff19d751bec50e67c8c72705bf02
   languageName: node
   linkType: hard
 
@@ -11731,9 +11770,9 @@ __metadata:
   linkType: hard
 
 "libphonenumber-js@npm:^1.10.31, libphonenumber-js@npm:^1.10.44":
-  version: 1.12.13
-  resolution: "libphonenumber-js@npm:1.12.13"
-  checksum: 1dd1c374add4919ce8862127d1336b22b4f56bc13b917298611891bc168c884f0a8131c081e6ee0bb43625304f969b3818aa9dfd151b018817fc06fb8909b3e2
+  version: 1.12.14
+  resolution: "libphonenumber-js@npm:1.12.14"
+  checksum: 98cd0e900ebb23c11b8dd41ff0713189c9e5a0e8fc2d0d7b83810e333fdec305cc5d61af50aff2af8a67225a4faea996afe2b4272056c2f183a41649c8b7133d
   languageName: node
   linkType: hard
 
@@ -12444,9 +12483,9 @@ __metadata:
   linkType: hard
 
 "ms@npm:^3.0.0-canary.1":
-  version: 3.0.0-canary.202508252038
-  resolution: "ms@npm:3.0.0-canary.202508252038"
-  checksum: 5f4850d84e4a8ca16a848c21b38f2d69768a57877d7dd3f3d9aac38d9c520b6a709a1a54bde446b8ba63d03f4f8fbef31ef31b9e8073149f438f136c675d0e00
+  version: 3.0.0-canary.202508261828
+  resolution: "ms@npm:3.0.0-canary.202508261828"
+  checksum: 6ece5d74c45e97c908b4222a95339e6938a3cb21ff8d03ed0f367828ba93744837faa93807e14200c270a21ffbb40d59ac8bb7186dd5a6d7df1bd7f7cbc51d55
   languageName: node
   linkType: hard
 
@@ -12692,8 +12731,8 @@ __metadata:
   linkType: hard
 
 "node-gyp@npm:^11.0.0, node-gyp@npm:^11.2.0, node-gyp@npm:latest":
-  version: 11.4.1
-  resolution: "node-gyp@npm:11.4.1"
+  version: 11.4.2
+  resolution: "node-gyp@npm:11.4.2"
   dependencies:
     env-paths: ^2.2.0
     exponential-backoff: ^3.1.1
@@ -12707,7 +12746,7 @@ __metadata:
     which: ^5.0.0
   bin:
     node-gyp: bin/node-gyp.js
-  checksum: 5a9be6e8c3f1e64268e7b26431296ed81c34b08e845158640577617b64eafc1404800665799bc4d9980d13ffebb583e2b453e5e726e3d56916cd77c707cc6996
+  checksum: d8041cee7ec60c86fb2961d77c12a2d083a481fb28b08e6d9583153186c0e7766044dc30bdb1f3ac01ddc5763b83caeed3d1ea35787ec4ffd8cc4aeedfc34f2b
   languageName: node
   linkType: hard
 
@@ -13266,9 +13305,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ox@npm:0.8.7":
-  version: 0.8.7
-  resolution: "ox@npm:0.8.7"
+"ox@npm:0.9.1":
+  version: 0.9.1
+  resolution: "ox@npm:0.9.1"
   dependencies:
     "@adraffy/ens-normalize": ^1.11.0
     "@noble/ciphers": ^1.3.0
@@ -13283,7 +13322,7 @@ __metadata:
   peerDependenciesMeta:
     typescript:
       optional: true
-  checksum: 48cddce088e5fe6d1f02fba19e1e02e18b97eb0e2ea7a3f7c4c92b55313618ace83721fad14fdfd1ca2d227adeafb6e17d2ec7d2398abffa2271942c81d11d21
+  checksum: 577946f69fb8fa2b80fad359ae6e315e459209392109e43313b6bb59a127bdef8eb1844bdd924b87751cc0613d4fe4b64ac08c6e9514d9b7c53367e3f7394a44
   languageName: node
   linkType: hard
 
@@ -14618,7 +14657,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"safe-buffer@npm:^5.1.2, safe-buffer@npm:^5.2.1, safe-buffer@npm:~5.2.0":
+"safe-buffer@npm:^5.0.1, safe-buffer@npm:^5.1.2, safe-buffer@npm:^5.2.1, safe-buffer@npm:~5.2.0":
   version: 5.2.1
   resolution: "safe-buffer@npm:5.2.1"
   checksum: b99c4b41fdd67a6aaf280fcd05e9ffb0813654894223afb78a31f14a19ad220bba8aba1cb14eddce1fcfb037155fe6de4e861784eb434f7d11ed58d1e70dd491
@@ -14660,7 +14699,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"safer-buffer@npm:>= 2.1.2 < 3, safer-buffer@npm:>= 2.1.2 < 3.0.0":
+"safer-buffer@npm:>= 2.1.2 < 3, safer-buffer@npm:>= 2.1.2 < 3.0.0, safer-buffer@npm:^2.1.0":
   version: 2.1.2
   resolution: "safer-buffer@npm:2.1.2"
   checksum: cab8f25ae6f1434abee8d80023d7e72b598cf1327164ddab31003c51215526801e40b66c5e65d658a0af1e9d6478cadcb4c745f4bd6751f97d8644786c0978b0
@@ -15518,6 +15557,13 @@ __metadata:
   version: 1.0.4
   resolution: "superstruct@npm:1.0.4"
   checksum: 2e070994cc4998a753c3f0215449d6de01ffb8180e4f46527f559ffbc2ebcc40fcf428f545ccd355921ef2920db7d138a96258ae35c788e6c24b2aa8bb1695cb
+  languageName: node
+  linkType: hard
+
+"supports-color@npm:^10.0.0":
+  version: 10.2.0
+  resolution: "supports-color@npm:10.2.0"
+  checksum: 3be13a46ba2766a4d0a50f00a369ae11de3c18ec638071e1c0c30782925b17aa59fcc3ef1197f1bcd6c3b326c625838f173825cc4ffd63a319839c62b56c91ed
   languageName: node
   linkType: hard
 
@@ -16651,8 +16697,8 @@ __metadata:
   linkType: hard
 
 "viem@npm:>=2.29.0, viem@npm:>=2.33.3, viem@npm:^2, viem@npm:^2.1.1, viem@npm:^2.31.7, viem@npm:^2.32.0":
-  version: 2.35.1
-  resolution: "viem@npm:2.35.1"
+  version: 2.36.0
+  resolution: "viem@npm:2.36.0"
   dependencies:
     "@noble/curves": 1.9.6
     "@noble/hashes": 1.8.0
@@ -16660,14 +16706,14 @@ __metadata:
     "@scure/bip39": 1.6.0
     abitype: 1.0.8
     isows: 1.0.7
-    ox: 0.8.7
+    ox: 0.9.1
     ws: 8.18.3
   peerDependencies:
     typescript: ">=5.0.4"
   peerDependenciesMeta:
     typescript:
       optional: true
-  checksum: 6331fc01433492c8fef0941dbbe909ecdbfa20a95523ca381501aa839042d5d734dcda33b644ce2a9443069c22dbecedcaef5649dc9a00d53e3c2d0ff634bd1d
+  checksum: 9dc94f729b1035a91469976dd7ed3d4b4d54844e73eaacb5e518d1c4ab7dac84942358c676f19718f4637692a66d9fd0b5571ddcfa128566c1d369b891a1ddcc
   languageName: node
   linkType: hard
 
@@ -16698,12 +16744,12 @@ __metadata:
   linkType: hard
 
 "weald@npm:^1.0.4":
-  version: 1.0.4
-  resolution: "weald@npm:1.0.4"
+  version: 1.0.6
+  resolution: "weald@npm:1.0.6"
   dependencies:
     ms: ^3.0.0-canary.1
-    supports-color: ^9.4.0
-  checksum: 3fe5463182b615ff36872c6168a646ccd1c5ffdaee69cc5731f2bc4181d3b70aeb957ea1ac7c584711a6b709cbfd9cb4bc0d9e78df8b2c9535845dd596f907be
+    supports-color: ^10.0.0
+  checksum: b89d2b392fb53c5967159787ab5ef7ee6a61a59df04574e7d765f9b2b58a25efac05cbda8aa4601941fda2e3f09f21653f0b7f4ea7f99e0cc409145046695391
   languageName: node
   linkType: hard
 

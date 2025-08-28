@@ -47,6 +47,10 @@
     "vercel": "yarn workspace @se-2/nextjs vercel",
     "vercel:login": "yarn workspace @se-2/nextjs vercel:login",
     "vercel:yolo": "yarn workspace @se-2/nextjs vercel:yolo",
+    "supabase": "yarn run supabase:configure",
+    "supabase:keygen": "yarn workspace @se-2/supabase gen:signing-key",
+    "supabase:jwk-to-pem": "yarn workspace @se-2/supabase jwk-to-pem",
+    "supabase:configure": "yarn workspace @se-2/supabase configure",
     "verify": "yarn foundry:verify"
   },
   "devDependencies": {

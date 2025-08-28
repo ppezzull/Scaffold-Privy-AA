@@ -5,11 +5,12 @@
 [![shadcn](https://img.shields.io/badge/Shadcn-shadcn%2Fui-purple)](https://ui.shadcn.com)
 [![foundry](https://img.shields.io/badge/Foundry-getfoundry.sh-ff7f50)](https://getfoundry.sh)
 [![nextjs](https://img.shields.io/badge/Next.js-nextjs.org-black)](https://nextjs.org)
+[![supabase](https://img.shields.io/badge/Supabase-supabase.io-3ECF8E)](https://supabase.com)
 
 🧪 An open-source, up-to-date toolkit for building decentralized applications (dapps) on the Ethereum blockchain with seamless onboarding through Privy's social login and account abstraction. It's designed to make it easier for developers to create and deploy smart contracts and build user interfaces that interact with those contracts without requiring users to have a traditional wallet or understand blockchain complexities.
 
 
-⚙️ Built using NextJS, Shadcn, Privy, Foundry, Wagmi, Viem, and Typescript.
+⚙️ Built using NextJS, Shadcn, Privy, Foundry, Supabase, Wagmi, Viem, and Typescript.
 
 - ✅ **Contract Hot Reload**: Your frontend auto-adapts to your smart contract as you edit it.
 - 🪝 **[Custom hooks](https://docs.scaffoldeth.io/hooks/)**: Collection of React hooks wrapping [wagmi](https://wagmi.sh/) to simplify interactions with smart contracts with TypeScript autocompletion.
@@ -18,6 +19,8 @@
 - 👥 **Social Login with Privy**: Allow users to log in with email, Google, Discord, Telegram and other social accounts.
 - 🪙 **Account Abstraction**: Privy assigns users a smart wallet they can access via social login or by connecting an existing wallet.
 - 🔗 **Integration with Traditional Wallets**: Connect to Coinbase Wallet, MetaMask, and other wallet providers.
+ - 🔐 **Supabase token exchange**: A server-side action verifies the Privy JWT and mints a short-lived Supabase-signed JWT used by the client for RLS-protected requests.
+ 
 
 
 ![Debug Contracts tab](https://i.postimg.cc/9FPMjq0Q/Screenshot-From-2025-08-28-01-24-41.png)
@@ -29,6 +32,7 @@ Before you begin, you need to install the following tools:
 - [Node (>= v20.18.3)](https://nodejs.org/en/download/)
 - Yarn ([v1](https://classic.yarnpkg.com/en/docs/install/) or [v2+](https://yarnpkg.com/getting-started/install))
 - [Git](https://git-scm.com/downloads)
+ - [Supabase (project & CLI)](https://supabase.com/docs/guides/cli)
 
 ## Quickstart
 
@@ -92,18 +96,29 @@ For Privy integration, check out the [Privy documentation](https://docs.privy.io
 
 ## Setting up Environment Variables
 
-1. In the `packages/nextjs` directory, copy `.env.example` to `.env.local` and add your API keys:
+1. In the `packages/nextjs` directory, copy `.env.example` to `.env.local` and add your API keys. Example entries (see `packages/nextjs/.env.example` for full comments):
    ```
-   # Required for accessing Ethereum networks
+   # REQUIRED (if using public networks)
    NEXT_PUBLIC_ALCHEMY_API_KEY=your-alchemy-api-key-here
-   
-   # Required for Privy social login and wallet features
+
+   # REQUIRED: Privy project ID
    NEXT_PUBLIC_PRIVY_APP_ID=your-privy-project-id-here
+
+   # Supabase (Privy-auth + RLS)
+   NEXT_PUBLIC_SUPABASE_URL=https://<PROJECT_ID>.supabase.co
+   NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY=your-publishable-or-anon-key
+
+   # SERVER-ONLY: Private key to mint Supabase JWTs (PEM, keep secret)
+   SUPABASE_JWT_PRIVATE_KEY=-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----
+
+   # SERVER-ONLY: Supabase Service Role Key (admin operations)
+   SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
    ```
 
 2. To get these keys:
    - For Alchemy: Sign up at [alchemy.com](https://www.alchemy.com/) and create a new API key
    - For Privy: Create an account at [console.privy.io](https://console.privy.io) and create a new project
+   - For Supabase: Create a project at [supabase.com](https://supabase.com), open your project dashboard (Settings → API) and copy your Project URL, Publishable/Anon key, Service Role key, and JWT Signing Keys.
 3. In the Privy dashboard (https://dashboard.privy.io/apps/[YOUR-PROJECT-ID]/login-methods), enable the login methods you want to support:
    - Make sure "Ethereum wallets" is enabled to support MetaMask, Coinbase Wallet, etc.
    - Enable social login methods like Google, Discord, Email, etc.

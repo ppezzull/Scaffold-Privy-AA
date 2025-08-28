@@ -1,3 +1,17 @@
+# Node
+node_modules/
+
+# Yarn Berry
+.yarn/releases
+.pnp.*
+
+# Generated Supabase signing keys (do not commit)
+packages/supabase/out/
+packages/supabase/signing_key.json
+*.pem
+
+# Local env files
+packages/nextjs/.env.local
 # dependencies
 node_modules
 
