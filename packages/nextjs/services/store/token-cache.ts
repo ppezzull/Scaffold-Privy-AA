@@ -1,7 +1,7 @@
 "use client";
 
-import { getPrivyToken } from "../../services/web3/privyToken";
-import { exchangePrivyToken } from "../actions/auth";
+import { exchangePrivyToken } from "../../utils/actions/auth";
+import { getPrivyToken } from "../web3/privyToken";
 
 let cached: { token: string; exp: number } | null = null;
 

@@ -1,4 +1,4 @@
-import { supabaseAdmin } from "./admin";
+import { supabaseAdmin } from "../supabase/admin";
 import type { JWTPayload } from "jose";
 
 export type PrivyAccessTokenPayload = JWTPayload & {
@@ -8,12 +8,21 @@ export type PrivyAccessTokenPayload = JWTPayload & {
 export async function getOrCreateUserUuidFromPrivyPayload(payload: PrivyAccessTokenPayload): Promise<string> {
   if (!payload?.sub) throw new Error("privy_payload_missing_sub");
   const privyDid = payload.sub;
+  try {
+    console.log("[user.upsert] start", { privyDid });
+  } catch {}
 
   // 1) Lookup existing user by privy_did
   {
     const { data, error } = await supabaseAdmin.from("users").select("id").eq("privy_did", privyDid).maybeSingle();
-    if (error) throw new Error(`users_lookup_failed:${error.message}`);
-    if (data?.id) return data.id as string;
+    if (error) {
+      console.error("[user.upsert] users_lookup_failed", { message: error.message });
+      throw new Error(`users_lookup_failed:${error.message}`);
+    }
+    if (data?.id) {
+      console.log("[user.upsert] found existing user", { id: data.id });
+      return data.id as string;
+    }
   }
 
   // 2) Optional email enrichment (not present in Privy Access Tokens by default)
@@ -33,10 +42,16 @@ export async function getOrCreateUserUuidFromPrivyPayload(payload: PrivyAccessTo
         .select("id")
         .eq("privy_did", privyDid)
         .single();
-      if (againErr || !again?.id) throw new Error(`users_select_after_conflict_failed:${againErr?.message}`);
+      if (againErr || !again?.id) {
+        console.error("[user.upsert] users_select_after_conflict_failed", { message: againErr?.message });
+        throw new Error(`users_select_after_conflict_failed:${againErr?.message}`);
+      }
+      console.log("[user.upsert] selected after conflict", { id: again.id });
       return again.id as string;
     }
+    console.error("[user.upsert] users_insert_failed", { message: insertErr.message });
     throw new Error(`users_insert_failed:${insertErr.message}`);
   }
+  console.log("[user.upsert] inserted user", { id: inserted!.id });
   return inserted!.id as string;
 }
