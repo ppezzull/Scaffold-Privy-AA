@@ -1,71 +1,67 @@
 "use client";
 
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useSupabaseSession } from "../providers/SupabaseProvider";
 import { Badge, CodeBlock, Section, Skeleton } from "./PrivySessionCard";
+import { getSupabaseAccessToken } from "~~/utils/supabase/token-cache";
+
+function decodeJwtUnsafe(token: string | null): Record<string, unknown> | null {
+  if (!token) return null;
+  try {
+    const [, payload] = token.split(".");
+    if (!payload) return null;
+    return JSON.parse(atob(payload));
+  } catch {
+    return null;
+  }
+}
 
 export function SupabaseSessionCard() {
-  const { client, loading: providerLoading, refresh } = useSupabaseSession();
+  const { claims: ctxClaims, loading: ctxLoading } = useSupabaseSession();
 
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [userRow, setUserRow] = useState<Record<string, unknown> | null>(null);
-
-  const fetchUser = useCallback(async () => {
-    if (!client) return;
-    setLoading(true);
-    setError(null);
-    try {
-      const { data, error } = await client.from("users").select("*").limit(1).single();
-      if (error) {
-        setUserRow(null);
-        setError(error.message);
-      } else {
-        setUserRow(data ?? null);
-      }
-    } finally {
-      setLoading(false);
-    }
-  }, [client]);
+  const [claims, setClaims] = useState<Record<string, unknown> | null>(null);
 
   useEffect(() => {
-    if (!client || providerLoading) return;
-    void fetchUser();
-  }, [client, providerLoading, fetchUser]);
+    let mounted = true;
+    (async () => {
+      try {
+        const token = await getSupabaseAccessToken();
+        if (!mounted) return;
+        setClaims(decodeJwtUnsafe(token));
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
-  const status = useMemo(() => {
-    if (providerLoading || loading) return { color: "yellow", text: "Loading…" } as const;
-    if (userRow) return { color: "green", text: "Ready" } as const;
-    return { color: "red", text: "Unavailable" } as const;
-  }, [providerLoading, loading, userRow]);
+  const finalLoading = ctxLoading || loading;
+  const finalClaims = ctxClaims ?? claims;
+  const connected = Boolean(finalClaims);
 
   return (
     <Section title="Supabase">
       <div className="flex items-center justify-between mb-3">
-        <div className="text-sm text-gray-600 dark:text-gray-300">User session (via RLS)</div>
-        <Badge color={status.color}>{status.text}</Badge>
+        <div className="text-sm text-gray-600 dark:text-gray-300">Custom JWT for RLS</div>
+        {finalLoading ? (
+          <Badge color="yellow">Loading…</Badge>
+        ) : connected ? (
+          <Badge color="green">Ready</Badge>
+        ) : (
+          <Badge color="red">Unavailable</Badge>
+        )}
       </div>
-      {providerLoading || loading ? (
+      {finalLoading ? (
         <Skeleton lines={4} />
-      ) : userRow ? (
+      ) : connected ? (
         <div className="space-y-3">
-          <CodeBlock data={userRow} label="users row" />
-          <div className="flex gap-2">
-            <button
-              className="rounded bg-secondary px-3 py-1 text-sm"
-              onClick={async () => {
-                await refresh();
-                await fetchUser();
-              }}
-            >
-              Refresh
-            </button>
-          </div>
+          <CodeBlock data={finalClaims} label="JWT claims" />
         </div>
       ) : (
-        <div className="text-sm text-gray-500 dark:text-gray-400">
-          {error ? `Error: ${error}` : "No session data. Log in to generate one."}
-        </div>
+        <div className="text-sm text-gray-500 dark:text-gray-400">No client token yet. Log in to generate one.</div>
       )}
     </Section>
   );

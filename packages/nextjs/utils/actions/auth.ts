@@ -1,7 +1,7 @@
 "use server";
 
 import { cookies } from "next/headers";
-import { getOrCreateUserUuidFromPrivyPayload } from "./user";
+import { getOrCreateUserUuidFromPrivyPayload } from "../supabase/user";
 import { JWTPayload, SignJWT, createRemoteJWKSet, importPKCS8, jwtVerify } from "jose";
 
 // Build Privy JWKS URL using the configured Privy App ID
@@ -27,12 +27,8 @@ if (!SUPABASE_URL) {
 const SUPABASE_URL_STR: string = SUPABASE_URL;
 const SUPABASE_ISS = `https://${SUPABASE_URL_STR.replace(/^https?:\/\//, "")}/auth/v1`;
 
-// JWT algorithm for signing Supabase tokens (configurable: RS256 or ES256)
-const ALG_ENV = process.env.SUPABASE_JWT_ALG;
-const ALG = (ALG_ENV === "RS256" ? "RS256" : "ES256") as "RS256" | "ES256";
-
-// Optional: specify a KID that matches a key in your Supabase project's JWKS
-const SUPABASE_JWT_KID = process.env.SUPABASE_JWT_KID;
+// JWT algorithm for signing Supabase tokens (fixed to ES256)
+const ALG = "ES256" as const;
 
 // Narrow type for just what we use from Privy payloads
 export type PrivyAccessTokenPayload = JWTPayload & {
@@ -83,17 +79,13 @@ export async function exchangePrivyToken(privyAccessToken: string): Promise<stri
   const exp = now + 60 * 30; // 30 minutes
 
   try {
-    // Import private key and sign with configured alg
-    console.log("[exchangePrivyToken] importing signing key", { alg: ALG, kid: SUPABASE_JWT_KID ?? null });
+    // Import EC P-256 key and sign with ES256
+    console.log("[exchangePrivyToken] importing signing key", { alg: ALG });
     const privateKey = await importPKCS8(SUPABASE_JWT_PRIVATE_KEY_STR, ALG);
 
-    console.log("[exchangePrivyToken] signing supabase jwt", {
-      alg: ALG,
-      kid: SUPABASE_JWT_KID ?? null,
-      expInSec: exp - now,
-    });
+    console.log("[exchangePrivyToken] signing supabase jwt", { alg: ALG, expInSec: exp - now });
     const supabaseJwt = await new SignJWT({ sub: userUuid, role: "authenticated" })
-      .setProtectedHeader({ alg: ALG, ...(SUPABASE_JWT_KID ? { kid: SUPABASE_JWT_KID } : {}) })
+      .setProtectedHeader({ alg: ALG })
       .setIssuer(SUPABASE_ISS)
       .setIssuedAt(now)
       .setExpirationTime(exp)

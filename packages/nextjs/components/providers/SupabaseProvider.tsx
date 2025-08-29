@@ -2,9 +2,8 @@
 
 import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { usePrivy } from "@privy-io/react-auth";
-import { clearSupabaseTokenCache, getSupabaseAccessToken } from "~~/services/store/token-cache";
-import { clearSupabaseAuthCookie } from "~~/utils/actions/auth";
 import { createClient as createBrowserSupabase } from "~~/utils/supabase/client";
+import { clearSupabaseTokenCache, getSupabaseAccessToken } from "~~/utils/supabase/token-cache";
 
 type Ctx = {
   client: ReturnType<typeof createBrowserSupabase> | null;
@@ -53,8 +52,6 @@ export function SupabaseProvider({ children }: { children: React.ReactNode }) {
     } else {
       clearSupabaseTokenCache();
       setClaims(null);
-      // Also clear the server cookie so SSR loses RLS context immediately
-      void clearSupabaseAuthCookie();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authenticated, ready]);

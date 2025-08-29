@@ -3,7 +3,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useSupabaseSession } from "../providers/SupabaseProvider";
 import { usePrivy } from "@privy-io/react-auth";
-import { getSupabaseAccessToken } from "~~/services/store/token-cache";
+import { getSupabaseAccessToken } from "~~/utils/supabase/token-cache";
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (

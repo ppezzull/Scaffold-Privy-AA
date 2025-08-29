@@ -10,7 +10,7 @@ import { NavigationMenu, NavigationMenuItem, NavigationMenuLink, NavigationMenuL
 import { usePrivy } from "@privy-io/react-auth";
 import { hardhat } from "viem/chains";
 import { useAccount } from "wagmi";
-import { Bars3Icon, BugAntIcon, MagnifyingGlassIcon, UserCircleIcon } from "@heroicons/react/24/outline";
+import { Bars3Icon, BugAntIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import { FaucetButton, PrivyCustomConnectButton } from "~~/components/scaffold-eth";
 import { useTargetNetwork } from "~~/hooks/scaffold-eth";
 import { cn } from "~~/lib/utils";
@@ -35,11 +35,6 @@ export const menuLinks: HeaderMenuLink[] = [
     label: "Block Explorer",
     href: "/blockexplorer",
     icon: <MagnifyingGlassIcon className="h-4 w-4 text-[var(--card-foreground)]" />,
-  },
-  {
-    label: "Session",
-    href: "/session",
-    icon: <UserCircleIcon className="h-4 w-4 text-[var(--card-foreground)]" />,
   },
 ];
 
