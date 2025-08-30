@@ -11,10 +11,10 @@ import { Header } from "~~/components/layout/Header";
 import { SupabaseProvider } from "~~/components/providers/SupabaseProvider";
 import { useInitializeNativeCurrencyPrice } from "~~/hooks/scaffold-eth";
 import scaffoldConfig from "~~/scaffold.config";
+import { clearSupabaseTokenCache, getSupabaseAccessToken } from "~~/services/store/token-cache";
 import { privyConfig } from "~~/services/web3/privyConfig";
 import { wagmiConfig } from "~~/services/web3/wagmiConfig";
 import { clearSupabaseAuthCookie } from "~~/utils/actions/auth";
-import { clearSupabaseTokenCache, getSupabaseAccessToken } from "~~/utils/supabase/token-cache";
 
 const ScaffoldEthApp = ({ children }: { children: React.ReactNode }) => {
   useInitializeNativeCurrencyPrice();

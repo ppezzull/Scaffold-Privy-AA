@@ -1,5 +1,5 @@
-import { getSupabaseAccessToken } from "./token-cache";
 import { createBrowserClient } from "@supabase/ssr";
+import { getSupabaseAccessToken } from "~~/services/store/token-cache";
 
 export function createClient() {
   return createBrowserClient(

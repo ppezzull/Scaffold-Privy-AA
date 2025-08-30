@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { useSupabaseSession } from "../providers/SupabaseProvider";
 import { Badge, CodeBlock, Section, Skeleton } from "./PrivySessionCard";
-import { getSupabaseAccessToken } from "~~/utils/supabase/token-cache";
+import { getSupabaseAccessToken } from "~~/services/store/token-cache";
 
 function decodeJwtUnsafe(token: string | null): Record<string, unknown> | null {
   if (!token) return null;

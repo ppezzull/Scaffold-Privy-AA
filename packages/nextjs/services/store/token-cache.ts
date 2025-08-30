@@ -1,7 +1,7 @@
 "use client";
 
-import { exchangePrivyToken } from "../../utils/actions/auth";
-import { getPrivyToken } from "../web3/privyToken";
+import { getPrivyToken } from "../../services/web3/privyToken";
+import { exchangePrivyToken } from "~~/utils/actions/auth";
 
 let cached: { token: string; exp: number } | null = null;
 const LS_KEY = "sb_exch";
@@ -11,6 +11,7 @@ function nowSec() {
 }
 
 export async function getSupabaseAccessToken(): Promise<string | null> {
+  // If we don't have a fresh in-memory token, try to hydrate from localStorage
   if (!cached && typeof window !== "undefined") {
     try {
       const raw = window.localStorage.getItem(LS_KEY);
@@ -35,6 +36,7 @@ export async function getSupabaseAccessToken(): Promise<string | null> {
   } catch {
     cached = { token: supaToken, exp: nowSec() + 60 * 10 };
   }
+  // Persist for reuse across HMR/reloads
   try {
     if (typeof window !== "undefined") window.localStorage.setItem(LS_KEY, JSON.stringify(cached));
   } catch {}

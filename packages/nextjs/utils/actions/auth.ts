@@ -1,7 +1,7 @@
 "use server";
 
 import { cookies } from "next/headers";
-import { getOrCreateUserUuidFromPrivyPayload } from "../supabase/user";
+import { getOrCreateUserUuidFromPrivyPayload } from "./user";
 import { JWTPayload, SignJWT, createRemoteJWKSet, decodeJwt, importJWK, importPKCS8, jwtVerify } from "jose";
 
 // Build Privy JWKS URL using the configured Privy App ID
