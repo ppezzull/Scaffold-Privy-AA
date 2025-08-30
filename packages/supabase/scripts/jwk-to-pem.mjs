@@ -32,7 +32,7 @@ const outDir = path.join(baseDir, 'out')
 // sensible default paths (Command-line args override these)
 const jwkCmd = getArg('--jwk', null)
 const outPemCmd = getArg('--out-pem', null)
-const envPath = getArg('--env', path.join(baseDir, '../nextjs/.env'))
+const envPath = getArg('--env', path.join(baseDir, '../nextjs/.env.local'))
 
 // If user passed explicit paths, use them; otherwise probe common locations.
 function firstExisting(paths) {

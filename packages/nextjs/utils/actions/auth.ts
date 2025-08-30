@@ -2,7 +2,7 @@
 
 import { cookies } from "next/headers";
 import { getOrCreateUserUuidFromPrivyPayload } from "../supabase/user";
-import { JWTPayload, SignJWT, createRemoteJWKSet, importPKCS8, jwtVerify } from "jose";
+import { JWTPayload, SignJWT, createRemoteJWKSet, decodeJwt, importJWK, importPKCS8, jwtVerify } from "jose";
 
 // Build Privy JWKS URL using the configured Privy App ID
 const PRIVY_APP_ID = process.env.NEXT_PUBLIC_PRIVY_APP_ID;
@@ -29,6 +29,8 @@ const SUPABASE_ISS = `https://${SUPABASE_URL_STR.replace(/^https?:\/\//, "")}/au
 
 // JWT algorithm for signing Supabase tokens (fixed to ES256)
 const ALG = "ES256" as const;
+// Optional KID to match the configured JWKS key in Supabase
+const SUPABASE_JWT_KID = process.env.SUPABASE_JWT_KID;
 
 // Narrow type for just what we use from Privy payloads
 export type PrivyAccessTokenPayload = JWTPayload & {
@@ -79,13 +81,48 @@ export async function exchangePrivyToken(privyAccessToken: string): Promise<stri
   const exp = now + 60 * 30; // 30 minutes
 
   try {
+    // Reuse existing valid cookie token if it matches this user and isn't expiring soon
+    try {
+      const cookieStore = await cookies();
+      const existing = cookieStore.get("sb-access-token")?.value;
+      if (existing) {
+        const decoded: any = decodeJwt(existing);
+        const existingSub: string | undefined = decoded?.sub as string | undefined;
+        const existingExp: number | undefined = decoded?.exp as unknown as number | undefined;
+        if (existingSub === userUuid && typeof existingExp === "number" && existingExp - now > 60) {
+          console.log("[exchangePrivyToken] reusing existing sb-access-token from cookie");
+          return existing;
+        }
+      }
+    } catch {
+      // Ignore cookie decode errors; we'll mint a fresh token below
+    }
+
     // Import EC P-256 key and sign with ES256
     console.log("[exchangePrivyToken] importing signing key", { alg: ALG });
-    const privateKey = await importPKCS8(SUPABASE_JWT_PRIVATE_KEY_STR, ALG);
+    let privateKey: CryptoKey;
+    let kidHeader = SUPABASE_JWT_KID;
+    // Normalize PEM: if value contains literal \n escapes, convert to real newlines first
+    const maybePem = SUPABASE_JWT_PRIVATE_KEY_STR.trim().startsWith("-----BEGIN")
+      ? SUPABASE_JWT_PRIVATE_KEY_STR.replace(/\\n/g, "\n")
+      : null;
+    if (maybePem) {
+      privateKey = await importPKCS8(maybePem, ALG);
+    } else {
+      try {
+        const parsed = JSON.parse(SUPABASE_JWT_PRIVATE_KEY_STR);
+        const jwk = Array.isArray(parsed) ? parsed[0] : parsed;
+        if (!kidHeader && typeof jwk?.kid === "string") kidHeader = jwk.kid as string;
+        privateKey = (await importJWK(jwk, ALG)) as unknown as CryptoKey;
+      } catch (e: any) {
+        console.error("[exchangePrivyToken] invalid private key format", { message: e?.message });
+        throw new Error("invalid_private_key_format");
+      }
+    }
 
     console.log("[exchangePrivyToken] signing supabase jwt", { alg: ALG, expInSec: exp - now });
     const supabaseJwt = await new SignJWT({ sub: userUuid, role: "authenticated" })
-      .setProtectedHeader({ alg: ALG })
+      .setProtectedHeader({ alg: ALG, kid: kidHeader, typ: "JWT" })
       .setIssuer(SUPABASE_ISS)
       .setIssuedAt(now)
       .setExpirationTime(exp)
@@ -98,18 +135,10 @@ export async function exchangePrivyToken(privyAccessToken: string): Promise<stri
       // Use the cookie name expected by Supabase SSR helpers
       cookieStore.set("sb-access-token", supabaseJwt, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
+        secure: true,
         sameSite: "lax",
         path: "/",
         maxAge: exp - now, // seconds
-      });
-      // Optional: clear any refresh token to avoid confusion (we don't use refresh flow here)
-      cookieStore.set("sb-refresh-token", "", {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
-        path: "/",
-        maxAge: 0,
       });
       console.log("[exchangePrivyToken] set sb-access-token cookie for SSR");
     } catch (err: any) {
@@ -130,14 +159,7 @@ export async function clearSupabaseAuthCookie(): Promise<void> {
     const cookieStore = await cookies();
     cookieStore.set("sb-access-token", "", {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      path: "/",
-      maxAge: 0,
-    });
-    cookieStore.set("sb-refresh-token", "", {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
+      secure: true,
       sameSite: "lax",
       path: "/",
       maxAge: 0,
