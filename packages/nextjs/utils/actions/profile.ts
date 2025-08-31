@@ -7,6 +7,18 @@ import { decodeJwt } from "jose";
 
 export type UserRow = Pick<Database["public"]["Tables"]["users"]["Row"], "id" | "name" | "surname" | "created_at">;
 
+async function getUserSub(): Promise<string | null> {
+  const cookieStore = await cookies();
+  const token = cookieStore.get("sb-access-token")?.value;
+  if (!token) return null;
+  try {
+    const decoded = decodeJwt(token) as { sub?: string };
+    return decoded.sub ?? null;
+  } catch {
+    return null;
+  }
+}
+
 export async function fetchPublicUsersAction(): Promise<UserRow[]> {
   const supabase = await createServerSupabase();
   const { data, error } = await supabase
@@ -19,17 +31,7 @@ export async function fetchPublicUsersAction(): Promise<UserRow[]> {
 
 export async function fetchMeAction(): Promise<UserRow | null> {
   const supabase = await createServerSupabase();
-  // Filter by the current user's sub from the cookie-backed JWT to avoid multi-row responses.
-  const cookieStore = await cookies();
-  const token = cookieStore.get("sb-access-token")?.value;
-  if (!token) return null;
-  let sub: string | undefined;
-  try {
-    const decoded = decodeJwt(token) as { sub?: string };
-    sub = decoded.sub;
-  } catch {
-    return null;
-  }
+  const sub = await getUserSub();
   if (!sub) return null;
   const { data, error } = await supabase.from("users").select("id,name,surname,created_at").eq("id", sub).maybeSingle();
   // If no session is present, RLS will reject with permission denied; treat as unauthenticated (null).
@@ -42,17 +44,7 @@ export async function fetchMeAction(): Promise<UserRow | null> {
 
 export async function updateMeAction(fields: { name: string | null; surname: string | null }): Promise<UserRow | null> {
   const supabase = await createServerSupabase();
-  // Resolve the current user's id from the cookie-backed JWT and update that row.
-  const cookieStore = await cookies();
-  const token = cookieStore.get("sb-access-token")?.value;
-  if (!token) throw new Error("not_authenticated");
-  let sub: string | undefined;
-  try {
-    const decoded = decodeJwt(token) as { sub?: string };
-    sub = decoded.sub;
-  } catch {
-    throw new Error("not_authenticated");
-  }
+  const sub = await getUserSub();
   if (!sub) throw new Error("not_authenticated");
   const { data, error } = await supabase
     .from("users")
