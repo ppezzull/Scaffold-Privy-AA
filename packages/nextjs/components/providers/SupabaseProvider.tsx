@@ -1,8 +1,10 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
+import React, { createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
+import { decodeJwtUnsafe } from "../../lib/jwt";
 import { usePrivy } from "@privy-io/react-auth";
 import { clearSupabaseTokenCache, getSupabaseAccessToken } from "~~/services/store/token-cache";
+import { clearSupabaseAuthCookie } from "~~/utils/actions/auth";
 import { createClient as createBrowserSupabase } from "~~/utils/supabase/client";
 
 type Ctx = {
@@ -14,22 +16,14 @@ type Ctx = {
 
 const SupabaseCtx = createContext<Ctx>({ client: null, claims: null, loading: true, refresh: async () => {} });
 
-function decodeJwt(token: string | null): Record<string, unknown> | null {
-  if (!token) return null;
-  try {
-    const [, payload] = token.split(".");
-    if (!payload) return null;
-    return JSON.parse(atob(payload));
-  } catch {
-    return null;
-  }
-}
-
 export function SupabaseProvider({ children }: { children: React.ReactNode }) {
   const { authenticated, ready } = usePrivy();
   const [client] = useState(() => createBrowserSupabase());
   const [claims, setClaims] = useState<Record<string, unknown> | null>(null);
   const [loading, setLoading] = useState(true);
+  const warmedRef = useRef(false);
+  const prevAuthRef = useRef<boolean | null>(null);
+  const clearedOnceRef = useRef(false);
 
   const refresh = useMemo(
     () =>
@@ -37,7 +31,7 @@ export function SupabaseProvider({ children }: { children: React.ReactNode }) {
         setLoading(true);
         try {
           const token = await getSupabaseAccessToken();
-          setClaims(decodeJwt(token));
+          setClaims(decodeJwtUnsafe(token));
         } finally {
           setLoading(false);
         }
@@ -47,12 +41,30 @@ export function SupabaseProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (!ready) return;
-    if (authenticated) {
-      void refresh();
-    } else {
+
+    // Initial unauthenticated mount: clear any stale cache once
+    if (prevAuthRef.current === null && !authenticated) {
       clearSupabaseTokenCache();
       setClaims(null);
     }
+
+    // Warm once per login
+    if (authenticated && !warmedRef.current) {
+      warmedRef.current = true;
+      clearedOnceRef.current = false; // reset for next logout
+      void refresh();
+    }
+
+    // Fire cookie clear only on transition from authenticated -> unauthenticated
+    const prev = prevAuthRef.current;
+    if (prev === true && authenticated === false && !clearedOnceRef.current) {
+      warmedRef.current = false;
+      clearedOnceRef.current = true;
+      clearSupabaseTokenCache();
+      setClaims(null);
+      void clearSupabaseAuthCookie();
+    }
+    prevAuthRef.current = authenticated;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authenticated, ready]);
 

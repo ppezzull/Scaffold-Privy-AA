@@ -44,22 +44,13 @@ export type PrivyAccessTokenPayload = JWTPayload & {
 export async function exchangePrivyToken(privyAccessToken: string): Promise<string> {
   if (!privyAccessToken) throw new Error("missing_privy_token");
 
-  // Debug: start
-  try {
-    console.log("[exchangePrivyToken] start", {
-      privyTokenLen: privyAccessToken?.length ?? 0,
-      privyAppIdSet: Boolean(PRIVY_APP_ID_STR),
-      supabaseUrlHost: SUPABASE_URL_STR.replace(/^https?:\/\//, ""),
-    });
-  } catch {}
+  // quiet: no verbose logs in production
 
   // 1) Verify the Privy token using Privy's JWKS
   let payload: PrivyAccessTokenPayload;
   try {
-    console.log("[exchangePrivyToken] verifying privy token against JWKS");
     const verified = await jwtVerify(privyAccessToken, PRIVY_JWKS);
     payload = verified.payload as PrivyAccessTokenPayload;
-    console.log("[exchangePrivyToken] privy token verified", { sub: payload?.sub });
   } catch (err: any) {
     console.error("[exchangePrivyToken] privy_verify_failed", { message: err?.message });
     throw new Error(`privy_verify_failed:${err?.message ?? "unknown"}`);
@@ -68,9 +59,7 @@ export async function exchangePrivyToken(privyAccessToken: string): Promise<stri
   // 2) Map Privy identity -> local users UUID for RLS
   let userUuid: string;
   try {
-    console.log("[exchangePrivyToken] mapping privy DID -> local user uuid");
     userUuid = await getOrCreateUserUuidFromPrivyPayload(payload);
-    console.log("[exchangePrivyToken] user mapped", { userUuid });
   } catch (err: any) {
     console.error("[exchangePrivyToken] users_upsert_failed", { message: err?.message });
     throw new Error(`users_upsert_failed:${err?.message ?? "unknown"}`);
@@ -90,7 +79,6 @@ export async function exchangePrivyToken(privyAccessToken: string): Promise<stri
         const existingSub: string | undefined = decoded?.sub as string | undefined;
         const existingExp: number | undefined = decoded?.exp as unknown as number | undefined;
         if (existingSub === userUuid && typeof existingExp === "number" && existingExp - now > 60) {
-          console.log("[exchangePrivyToken] reusing existing sb-access-token from cookie");
           return existing;
         }
       }
@@ -99,7 +87,6 @@ export async function exchangePrivyToken(privyAccessToken: string): Promise<stri
     }
 
     // Import EC P-256 key and sign with ES256
-    console.log("[exchangePrivyToken] importing signing key", { alg: ALG });
     let privateKey: CryptoKey;
     let kidHeader = SUPABASE_JWT_KID;
     // Normalize PEM: if value contains literal \n escapes, convert to real newlines first
@@ -120,14 +107,12 @@ export async function exchangePrivyToken(privyAccessToken: string): Promise<stri
       }
     }
 
-    console.log("[exchangePrivyToken] signing supabase jwt", { alg: ALG, expInSec: exp - now });
     const supabaseJwt = await new SignJWT({ sub: userUuid, role: "authenticated" })
       .setProtectedHeader({ alg: ALG, kid: kidHeader, typ: "JWT" })
       .setIssuer(SUPABASE_ISS)
       .setIssuedAt(now)
       .setExpirationTime(exp)
       .sign(privateKey);
-    console.log("[exchangePrivyToken] signed supabase jwt", { tokenLen: supabaseJwt.length });
 
     // Also set an HttpOnly cookie so server-side Supabase client (SSR) can apply RLS without a session
     try {
@@ -140,7 +125,6 @@ export async function exchangePrivyToken(privyAccessToken: string): Promise<stri
         path: "/",
         maxAge: exp - now, // seconds
       });
-      console.log("[exchangePrivyToken] set sb-access-token cookie for SSR");
     } catch (err: any) {
       console.warn("[exchangePrivyToken] failed setting cookie (non-fatal)", { message: err?.message });
     }
@@ -164,7 +148,6 @@ export async function clearSupabaseAuthCookie(): Promise<void> {
       path: "/",
       maxAge: 0,
     });
-    console.log("[clearSupabaseAuthCookie] cleared");
   } catch (err: any) {
     console.warn("[clearSupabaseAuthCookie] failed", { message: err?.message });
   }

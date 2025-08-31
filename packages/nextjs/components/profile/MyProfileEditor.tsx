@@ -13,7 +13,7 @@ export function MyProfileEditor({ me: initial }: { me: UserRow | null }) {
   }, [state]);
 
   return (
-    <div>
+    <div className="rounded-lg border border-gray-200 dark:border-gray-700/60 bg-white dark:bg-gray-800 p-4 shadow-sm">
       <p className="text-sm text-gray-600 dark:text-gray-300 mb-3">Your profile (RLS: owner-only update)</p>
       <div className="space-y-3">
         <div className="text-xs font-mono break-all">{me?.id}</div>
@@ -31,7 +31,7 @@ export function MyProfileEditor({ me: initial }: { me: UserRow | null }) {
             <input
               name="name"
               defaultValue={me?.name ?? ""}
-              className="mt-1 w-full rounded border border-gray-300 dark:border-gray-700 bg-transparent px-3 py-2 text-sm"
+              className="mt-1 w-full rounded border border-gray-300 dark:border-gray-600 dark:bg-gray-700 bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40"
             />
           </label>
           <label className="block">
@@ -39,7 +39,7 @@ export function MyProfileEditor({ me: initial }: { me: UserRow | null }) {
             <input
               name="surname"
               defaultValue={me?.surname ?? ""}
-              className="mt-1 w-full rounded border border-gray-300 dark:border-gray-700 bg-transparent px-3 py-2 text-sm"
+              className="mt-1 w-full rounded border border-gray-300 dark:border-gray-600 dark:bg-gray-700 bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40"
             />
           </label>
           <div className="sm:col-span-2">
