@@ -1,28 +1,11 @@
 import React from "react";
-import { cookies } from "next/headers";
 import { MyProfileEditor } from "../../components/profile/MyProfileEditor";
 import { PublicUsersList } from "../../components/profile/PublicUsersList";
 import { fetchMeAction, fetchPublicUsersAction } from "../../utils/actions/profile";
 
 export default async function ProfilePage() {
-  const cookieStore = await cookies();
-  const token = cookieStore.get("sb-access-token")?.value || null;
-
-  const [users, meOrError] = await Promise.all([
-    fetchPublicUsersAction(),
-    (async () => {
-      if (!token) return { ok: true as const, me: null };
-      try {
-        const me = await fetchMeAction(token);
-        return { ok: true as const, me };
-      } catch (e: any) {
-        return { ok: false as const, error: e?.message ?? "Unknown error" };
-      }
-    })(),
-  ]);
-
-  const me = meOrError.ok ? meOrError.me : null;
-  const error = meOrError.ok ? null : meOrError.error;
+  const [users, me] = await Promise.all([fetchPublicUsersAction(), fetchMeAction()]);
+  const error = null;
 
   return (
     <div className="max-w-5xl mx-auto p-6 space-y-6">

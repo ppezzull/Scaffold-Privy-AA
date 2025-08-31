@@ -1,3 +1,4 @@
+import { Database } from "../models/supabase";
 import { createClient } from "@supabase/supabase-js";
 
 // Server-only Supabase admin client. Use this for admin operations (upserts, migrations,
@@ -13,7 +14,7 @@ if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
   );
 }
 
-export const supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
+export const supabaseAdmin = createClient<Database>(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
   auth: { persistSession: false },
   // Optional: set a custom header to help identify server requests in logs
   global: { headers: { "x-supabase-admin": "scaffold-privy-aa" } },

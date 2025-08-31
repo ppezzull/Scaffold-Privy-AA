@@ -1,16 +1,12 @@
 "use client";
 
-import React, { useEffect, useState, useTransition } from "react";
-import { type UpdateState, type UserRow, updateMeFromCookieAction } from "../../utils/actions/profile";
+import React, { useState, useTransition } from "react";
+import { type UserRow, updateMeAction } from "../../utils/actions/profile";
 
 export function MyProfileEditor({ me: initial }: { me: UserRow | null }) {
   const [me, setMe] = useState<UserRow | null>(initial);
   const [isPending, startTransition] = useTransition();
-  const [state, setState] = useState<UpdateState | null>(null);
-
-  useEffect(() => {
-    if (state?.ok && state.data) setMe(state.data);
-  }, [state]);
+  const [state, setState] = useState<{ ok: boolean; error?: string | null } | null>(null);
 
   return (
     <div className="rounded-lg border border-gray-200 dark:border-gray-700/60 bg-white dark:bg-gray-800 p-4 shadow-sm">
@@ -21,8 +17,18 @@ export function MyProfileEditor({ me: initial }: { me: UserRow | null }) {
           className="grid grid-cols-1 sm:grid-cols-2 gap-3"
           action={formData => {
             startTransition(async () => {
-              const result = await updateMeFromCookieAction({ ok: false }, formData);
-              setState(result);
+              try {
+                const nameRaw = (formData.get("name") as string) ?? "";
+                const surnameRaw = (formData.get("surname") as string) ?? "";
+                const data = await updateMeAction({
+                  name: nameRaw.trim() || null,
+                  surname: surnameRaw.trim() || null,
+                });
+                setMe(data);
+                setState({ ok: true });
+              } catch (e: any) {
+                setState({ ok: false, error: e?.message ?? "Update failed" });
+              }
             });
           }}
         >

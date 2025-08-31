@@ -1,5 +1,6 @@
 // lib/supabase/server.ts
 import { cookies } from "next/headers";
+import { Database } from "../models/supabase";
 import { createServerClient } from "@supabase/ssr";
 
 /**
@@ -13,7 +14,7 @@ export async function createClient(exchangedJwt?: string) {
   // Example cookie name used in our guide: 'sb-access-token' (HttpOnly, Secure)
   const token = exchangedJwt ?? cookieStore.get("sb-access-token")?.value ?? "";
 
-  return createServerClient(
+  return createServerClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY!,
     {
