@@ -46,6 +46,8 @@ export function SupabaseProvider({ children }: { children: React.ReactNode }) {
     if (prevAuthRef.current === null && !authenticated) {
       clearSupabaseTokenCache();
       setClaims(null);
+      // We're unauthenticated and ready; no need to keep loading
+      setLoading(false);
     }
 
     // Warm once per login
@@ -63,6 +65,8 @@ export function SupabaseProvider({ children }: { children: React.ReactNode }) {
       clearSupabaseTokenCache();
       setClaims(null);
       void clearSupabaseAuthCookie();
+      // Stop loading after logout
+      setLoading(false);
     }
     prevAuthRef.current = authenticated;
     // eslint-disable-next-line react-hooks/exhaustive-deps

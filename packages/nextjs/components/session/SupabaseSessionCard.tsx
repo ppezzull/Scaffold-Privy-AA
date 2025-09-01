@@ -6,7 +6,8 @@ import SessionCard from "~~/components/ui/session-card";
 
 export function SupabaseSessionCard({ initialClaims }: { initialClaims?: Record<string, unknown> | null }) {
   const { claims: ctxClaims, loading: ctxLoading } = useSupabaseSession();
-  const finalLoading = ctxLoading;
+  // Only show loading if we expect claims to arrive; otherwise render as unavailable
+  const finalLoading = Boolean(ctxLoading && (ctxClaims != null || initialClaims != null));
   const finalClaims = ctxClaims ?? initialClaims;
   const connected = Boolean(finalClaims);
 

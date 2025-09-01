@@ -23,7 +23,7 @@
  
 
 
-![Debug Contracts tab](https://i.postimg.cc/9FPMjq0Q/Screenshot-From-2025-08-28-01-24-41.png)
+![Debug Contracts tab](https://i.postimg.cc/fR1w3vr8/Screenshot-From-2025-09-01-16-23-39.png)
 
 ## Requirements
 
@@ -36,9 +36,9 @@ Before you begin, you need to install the following tools:
 
 ## Quickstart
 
-To get started with Scaffold-Privy-AA, follow the steps below:
+Follow these steps to get up and running fast.
 
-1. Install dependencies if it was skipped in CLI:
+1) Install dependencies:
 
 ```
 git clone https://github.com/ppezzull/Scaffold-Privy-AA
@@ -46,91 +46,79 @@ cd Scaffold-Privy-AA
 yarn install
 ```
 
-2. Set up your environment variables:
-   - In the `packages/nextjs` directory, copy `.env.example` to `.env.local`
-   - (Optional for localhost) Get an Alchemy API key from [alchemy.com](https://www.alchemy.com/) if connecting to public Ethereum networks
-   - Create a Privy account at [console.privy.io](https://console.privy.io)
-   - Create a new project and obtain your Privy project ID
-   - Add both keys to the `.env.local` file
-   - In the Privy dashboard (https://dashboard.privy.io/apps/[YOUR-PROJECT-ID]/login-methods), enable Ethereum wallets
+2) Common prerequisites (used by both Local and Production):
+    - Alchemy: Create an API key at https://www.alchemy.com/ (optional for local, required if you’ll hit public networks). Set `NEXT_PUBLIC_ALCHEMY_API_KEY` in `packages/nextjs/.env.local` when needed.
+    - Privy: Create a project at https://console.privy.io and copy your App ID into `NEXT_PUBLIC_PRIVY_APP_ID`.
+       - In the Privy Dashboard (Apps → Login methods), enable the login methods you want: Ethereum wallets, Google, Discord, Email, etc.
+       - You can customize behavior in `packages/nextjs/components/PrivyConnector.tsx`.
 
-3. Run a local network in the first terminal:
+3) Choose your environment
 
+### Local development
+
+Environment and Supabase
+- In `packages/nextjs`, copy `.env.example` to `.env.local` and uncomment the “Local Development — Supabase CLI (HS256)” section.
+- Ensure `packages/supabase/config.toml` is in HS256 mode (no `signing_keys_path`).
+- Fill `NEXT_PUBLIC_PRIVY_APP_ID`; add `NEXT_PUBLIC_ALCHEMY_API_KEY` only if you plan to use public networks.
+
+Run (in separate terminals)
 ```
+yarn supabase:start
 yarn chain
-```
-
-This command starts a local Ethereum network using Foundry. The network runs on your local machine and can be used for testing and development. You can customize the network configuration in `packages/foundry/foundry.toml`.
-
-4. On a second terminal, deploy the test contract:
-
-```
+yarn start
 yarn deploy
 ```
 
-This command deploys a test smart contract to the local network. The contract is located in `packages/foundry/contracts` and can be modified to suit your needs. The `yarn deploy` command uses the deploy script located in `packages/foundry/script` to deploy the contract to the network. You can also customize the deploy script.
+Notes
+- Visit the app at http://localhost:3000
+- The local Ethereum node is configured in `packages/foundry/foundry.toml`.
+- Contracts live in `packages/foundry/contracts`; deploy scripts in `packages/foundry/script`.
 
-5. On a third terminal, start your NextJS app:
+### Production / Hosted
 
+Environment
+- In `packages/nextjs`, copy `.env.example` to `.env.local` and uncomment the “Production/Hosted — Supabase (ES256/RS256 with JWKS)” section.
+- From Supabase Dashboard → Settings → API, fill:
+   - `NEXT_PUBLIC_SUPABASE_URL`
+   - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY`
+   - `SUPABASE_SERVICE_ROLE_KEY`
+
+JWT signing (ES256 with JWKS)
 ```
+yarn supabase:keygen
+```
+- Add the generated JWK in Supabase Dashboard → Settings → JWT → Signing Keys.
+- Update the `kid` in `packages/supabase/out/signing_key.json` to the one shown in Supabase.
+```
+yarn supabase:jwk-to-pem
+```
+- Optional: verify JWKS at `https://<PROJECT_ID>.supabase.co/auth/v1/keys` (the `kid` must match).
+
+Run (in separate terminals)
+```
+yarn chain
 yarn start
+yarn deploy
 ```
 
-Visit your app on: `http://localhost:3000`. You can interact with your smart contract using the `Debug Contracts` page. You can tweak the app config in `packages/nextjs/scaffold.config.ts`.
-
-**Important**: Make sure to set up both your Alchemy API key (optional if only using localhost) and Privy project ID in the `.env.local` file. The Alchemy API key is required to access public Ethereum networks, and the Privy project ID is needed for social login functionality. Without these, your dApp may not work as expected.
-
-Run smart contract test with `yarn foundry:test`
-
-- Edit your smart contracts in `packages/foundry/contracts`
-- Edit your frontend homepage at `packages/nextjs/app/page.tsx`. For guidance on [routing](https://nextjs.org/docs/app/building-your-application/routing/defining-routes) and configuring [pages/layouts](https://nextjs.org/docs/app/building-your-application/routing/pages-and-layouts) checkout the Next.js documentation.
-- Edit your deployment scripts in `packages/foundry/script`
-- Customize your Privy configuration in `components/PrivyConnector.tsx`
+Important
+- Use `.env.local` for both local and production setups. Never commit real secrets; for hosting, configure platform environment variables.
 
 
 ## Documentation
 
-Visit [Scaffold-ETH 2 docs](https://docs.scaffoldeth.io) to learn about the base framework.
+- Visit [Scaffold-ETH 2 docs](https://docs.scaffoldeth.io) to learn about the base framework.
+- For Privy integration, see the [Privy documentation](https://docs.privy.io/) to customize social login and embedded wallets.
+- For Supabase-specific guidance (auth, JWT signing keys, RLS), see the [Supabase docs](https://supabase.com/docs) and the [JWT Signing Keys guide](https://supabase.com/docs/guides/auth/signing-keys).
 
-For Privy integration, check out the [Privy documentation](https://docs.privy.io/) to understand how to customize the social login and wallet experience.
+## How Privy Works with Supabase in this Project 
 
-## Setting up Environment Variables
+Short version:
+- Users authenticate with Privy (social + wallets). The client sends the Privy access token to a Server Action.
+- The Server Action verifies the Privy JWT against Privy’s JWKS, maps/creates a local user in Supabase, and mints a short‑lived Supabase‑signed JWT with sub=<users.id> and role=authenticated.
+- The JWT is stored in an HttpOnly cookie for SSR and also provided to the browser Supabase client via an accessToken callback for RLS‑protected queries.
 
-1. In the `packages/nextjs` directory, copy `.env.example` to `.env.local` and add your API keys. Example entries (see `packages/nextjs/.env.example` for full comments):
-   ```
-   # REQUIRED (if using public networks)
-   NEXT_PUBLIC_ALCHEMY_API_KEY=your-alchemy-api-key-here
-
-   # REQUIRED: Privy project ID
-   NEXT_PUBLIC_PRIVY_APP_ID=your-privy-project-id-here
-
-   # Supabase (Privy-auth + RLS)
-   NEXT_PUBLIC_SUPABASE_URL=https://<PROJECT_ID>.supabase.co
-   NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY=your-publishable-or-anon-key
-
-   # SERVER-ONLY: Private key to mint Supabase JWTs (PEM, keep secret)
-   SUPABASE_JWT_PRIVATE_KEY=-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----
-
-   # SERVER-ONLY: Supabase Service Role Key (admin operations)
-   SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
-   ```
-
-2. To get these keys:
-   - For Alchemy: Sign up at [alchemy.com](https://www.alchemy.com/) and create a new API key
-   - For Privy: Create an account at [console.privy.io](https://console.privy.io) and create a new project
-   - For Supabase: Create a project at [supabase.com](https://supabase.com), open your project dashboard (Settings → API) and copy your Project URL, Publishable/Anon key, Service Role key, and JWT Signing Keys.
-3. In the Privy dashboard (https://dashboard.privy.io/apps/[YOUR-PROJECT-ID]/login-methods), enable the login methods you want to support:
-   - Make sure "Ethereum wallets" is enabled to support MetaMask, Coinbase Wallet, etc.
-   - Enable social login methods like Google, Discord, Email, etc.
-4. Configure additional customization in `components/PrivyConnector.tsx`
-
-## How Privy Works in this Project
-
-Privy provides users with a smart wallet that they can access through:
-1. Social login (Google, Discord, email, etc.)
-2. Connecting an existing wallet (MetaMask, Coinbase Wallet, etc.)
-
-When a user logs in with a social account, they are assigned a wallet that remains consistent across sessions. This wallet can be used to sign transactions and interact with your dApp's smart contracts seamlessly.
+Details and snippets: see [rules/supabase-privy.md](./rules/supabase-privy.md)
 
 ## Contributing to Scaffold-Privy-AA
 

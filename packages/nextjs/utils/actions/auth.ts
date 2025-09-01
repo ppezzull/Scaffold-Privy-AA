@@ -12,12 +12,19 @@ if (!PRIVY_APP_ID) {
 const PRIVY_APP_ID_STR: string = PRIVY_APP_ID;
 const PRIVY_JWKS = createRemoteJWKSet(new URL(`https://auth.privy.io/api/v1/apps/${PRIVY_APP_ID_STR}/jwks.json`));
 
-// Supabase private signing key (PEM) used to sign exchanged JWTs
+// Supabase signing configuration
+// ALG can be ES256 (asymmetric, recommended) or HS256 (symmetric, useful for local CLI defaults)
+const ALG = (process.env.SUPABASE_JWT_ALG || "ES256") as "ES256" | "HS256";
+// For ES256, require a private key (PEM or JWK) in SUPABASE_JWT_PRIVATE_KEY
+// For HS256, prefer SUPABASE_JWT_HS256_SECRET, else fall back to SUPABASE_JWT_PRIVATE_KEY as a raw secret
 const SUPABASE_JWT_PRIVATE_KEY = process.env.SUPABASE_JWT_PRIVATE_KEY;
-if (!SUPABASE_JWT_PRIVATE_KEY) {
-  throw new Error("SUPABASE_JWT_PRIVATE_KEY is not set");
+const SUPABASE_JWT_HS256_SECRET = process.env.SUPABASE_JWT_HS256_SECRET;
+if (ALG === "ES256") {
+  if (!SUPABASE_JWT_PRIVATE_KEY) {
+    throw new Error("SUPABASE_JWT_PRIVATE_KEY is not set (required for ES256)");
+  }
 }
-const SUPABASE_JWT_PRIVATE_KEY_STR: string = SUPABASE_JWT_PRIVATE_KEY;
+const SUPABASE_JWT_PRIVATE_KEY_STR: string | undefined = SUPABASE_JWT_PRIVATE_KEY;
 
 // Issuer must match your Supabase project's auth issuer
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -25,10 +32,9 @@ if (!SUPABASE_URL) {
   throw new Error("NEXT_PUBLIC_SUPABASE_URL is not set");
 }
 const SUPABASE_URL_STR: string = SUPABASE_URL;
-const SUPABASE_ISS = `https://${SUPABASE_URL_STR.replace(/^https?:\/\//, "")}/auth/v1`;
+// Preserve the protocol (http/https) from the configured URL
+const SUPABASE_ISS = `${SUPABASE_URL_STR.replace(/\/$/, "")}/auth/v1`;
 
-// JWT algorithm for signing Supabase tokens (fixed to ES256)
-const ALG = "ES256" as const;
 // Optional KID to match the configured JWKS key in Supabase
 const SUPABASE_JWT_KID = process.env.SUPABASE_JWT_KID;
 
@@ -86,33 +92,58 @@ export async function exchangePrivyToken(privyAccessToken: string): Promise<stri
       // Ignore cookie decode errors; we'll mint a fresh token below
     }
 
-    // Import EC P-256 key and sign with ES256
-    let privateKey: CryptoKey;
-    let kidHeader = SUPABASE_JWT_KID;
-    // Normalize PEM: if value contains literal \n escapes, convert to real newlines first
-    const maybePem = SUPABASE_JWT_PRIVATE_KEY_STR.trim().startsWith("-----BEGIN")
-      ? SUPABASE_JWT_PRIVATE_KEY_STR.replace(/\\n/g, "\n")
-      : null;
-    if (maybePem) {
-      privateKey = await importPKCS8(maybePem, ALG);
-    } else {
-      try {
-        const parsed = JSON.parse(SUPABASE_JWT_PRIVATE_KEY_STR);
-        const jwk = Array.isArray(parsed) ? parsed[0] : parsed;
-        if (!kidHeader && typeof jwk?.kid === "string") kidHeader = jwk.kid as string;
-        privateKey = (await importJWK(jwk, ALG)) as unknown as CryptoKey;
-      } catch (e: any) {
-        console.error("[exchangePrivyToken] invalid private key format", { message: e?.message });
-        throw new Error("invalid_private_key_format");
-      }
-    }
+    // Build signing key based on ALG
+    let kidHeader = SUPABASE_JWT_KID as string | undefined;
+    let supabaseJwt: string;
 
-    const supabaseJwt = await new SignJWT({ sub: userUuid, role: "authenticated" })
-      .setProtectedHeader({ alg: ALG, kid: kidHeader, typ: "JWT" })
-      .setIssuer(SUPABASE_ISS)
-      .setIssuedAt(now)
-      .setExpirationTime(exp)
-      .sign(privateKey);
+    if (ALG === "ES256") {
+      if (!SUPABASE_JWT_PRIVATE_KEY_STR) throw new Error("missing_es256_private_key");
+      // Normalize PEM: if value contains literal \n escapes, convert to real newlines first
+      const maybePem = SUPABASE_JWT_PRIVATE_KEY_STR.trim().startsWith("-----BEGIN")
+        ? SUPABASE_JWT_PRIVATE_KEY_STR.replace(/\\n/g, "\n")
+        : null;
+      let privateKey: CryptoKey;
+      if (maybePem) {
+        privateKey = await importPKCS8(maybePem, ALG);
+      } else {
+        try {
+          const parsed = JSON.parse(SUPABASE_JWT_PRIVATE_KEY_STR);
+          const jwk = Array.isArray(parsed) ? parsed[0] : parsed;
+          if (!kidHeader && typeof jwk?.kid === "string") kidHeader = jwk.kid as string;
+          privateKey = (await importJWK(jwk, ALG)) as unknown as CryptoKey;
+        } catch (e: any) {
+          console.error("[exchangePrivyToken] invalid ES256 private key format", { message: e?.message });
+          throw new Error("invalid_private_key_format");
+        }
+      }
+      supabaseJwt = await new SignJWT({ sub: userUuid, role: "authenticated" })
+        .setProtectedHeader({ alg: ALG, kid: kidHeader, typ: "JWT" })
+        .setIssuer(SUPABASE_ISS)
+        .setIssuedAt(now)
+        .setExpirationTime(exp)
+        .sign(privateKey);
+    } else {
+      // HS256 path for local dev with CLI default secret
+      const secret = (SUPABASE_JWT_HS256_SECRET || SUPABASE_JWT_PRIVATE_KEY_STR || "").trim();
+      if (!secret) {
+        console.error("[exchangePrivyToken] missing HS256 secret: set SUPABASE_JWT_HS256_SECRET");
+        throw new Error("missing_hs256_secret");
+      }
+      // Convert raw UTF-8 secret to base64url for oct JWK import
+      const b64 = Buffer.from(secret, "utf8")
+        .toString("base64")
+        .replace(/=+$/g, "")
+        .replace(/\+/g, "-")
+        .replace(/\//g, "_");
+      const jwk = { kty: "oct", k: b64, alg: "HS256" } as const;
+      const hmacKey = (await importJWK(jwk, "HS256")) as unknown as CryptoKey;
+      supabaseJwt = await new SignJWT({ sub: userUuid, role: "authenticated" })
+        .setProtectedHeader({ alg: "HS256", typ: "JWT" })
+        .setIssuer(SUPABASE_ISS)
+        .setIssuedAt(now)
+        .setExpirationTime(exp)
+        .sign(hmacKey);
+    }
 
     // Also set an HttpOnly cookie so server-side Supabase client (SSR) can apply RLS without a session
     try {

@@ -9,33 +9,31 @@ Users authenticate with **Privy** (existing wallets + embedded). A **Server Acti
 Copy `packages/nextjs/.env.example` to `packages/nextjs/.env.local` and fill in:
 
 ```bash
-# REQUIRED
-NEXT_PUBLIC_ALCHEMY_API_KEY=
+# Common
 NEXT_PUBLIC_PRIVY_APP_ID=
+NEXT_PUBLIC_ALCHEMY_API_KEY=
 
-# Supabase (Privy-auth + RLS)
+# Supabase (URL + client key)
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY=
-```
 
-Server-only secret required by the Server Action (included in `.env.example`; do NOT prefix with NEXT_PUBLIC):
-
-```bash
-# Private key used by your app to mint Supabase JWTs (PEM: RS256 or ES256)
-# Paste as multi-line PEM with BEGIN/END in .env.local, or use \n escapes if your host requires.
-SUPABASE_JWT_PRIVATE_KEY=
-```
-
-Admin key for user upserts (included in `.env.example`; server-only):
-
-```bash
-# Supabase service role key used by server-only admin client to upsert users before a session exists
-# NEVER expose client-side. Configure in your platform’s server env (e.g., Vercel project settings).
+# Server-only admin (user upserts)
 SUPABASE_SERVICE_ROLE_KEY=
+
+# Signing config for exchanged JWTs
+# Choose one algorithm:
+#  - Local:   SUPABASE_JWT_ALG=HS256 and set SUPABASE_JWT_HS256_SECRET to your CLI secret
+#  - Hosted:  SUPABASE_JWT_ALG=ES256 and set SUPABASE_JWT_PRIVATE_KEY (PEM or JWK) and optional SUPABASE_JWT_KID
+SUPABASE_JWT_ALG=HS256|ES256
+SUPABASE_JWT_HS256_SECRET=
+SUPABASE_JWT_PRIVATE_KEY=
+SUPABASE_JWT_KID=
 ```
 
-* Ensure your Supabase project uses **asymmetric Signing Keys** (JWKS available at `/auth/v1/.well-known/jwks.json`). ([Supabase][2], [DEV Community][3])
-* We’ll **verify Privy tokens** against **Privy’s JWKS**: `https://auth.privy.io/api/v1/apps/<APP_ID>/jwks.json`. ([Privy Docs][1])
+Notes
+- Issuer must match your project: `${NEXT_PUBLIC_SUPABASE_URL}/auth/v1`
+- Local CLI may not expose a JWKS endpoint; use HS256 locally. In production, prefer ES256 with JWKS.
+- We verify Privy tokens against: `https://auth.privy.io/api/v1/apps/<APP_ID>/jwks.json`.
 
 Install deps:
 
@@ -47,7 +45,7 @@ yarn add @privy-io/react-auth @supabase/supabase-js jose
 
 ---
 
-## 1) High‑level flow (Option A)
+## 1) High‑level flow
 
 1. User logs in with **Privy** (existing wallet or embedded).
 2. Client calls a **Server Action** with the **Privy access token**.
@@ -56,98 +54,88 @@ yarn add @privy-io/react-auth @supabase/supabase-js jose
 
 ---
 
-## 2) Providers (Privy‑first UX)
+## 2) Providers and lifecycle wiring (Privy‑first UX)
 
-`components/Providers.tsx`
+This repo wires Supabase auth lifecycle alongside Privy in `packages/nextjs/components/providers/SupabaseProvider.tsx`.
 
-```tsx
-'use client'
+Key points
+- Uses `usePrivy()` to detect login/logout and warm/cool the Supabase token cache.
+- Calls the Server Action to exchange the Privy token and sets an HttpOnly `sb-access-token` cookie.
+- Clears the cookie and cache on logout via `clearSupabaseAuthCookie()`.
 
-import { PrivyProvider } from '@privy-io/react-auth'
-import { ReactNode } from 'react'
-
-export default function Providers({ children }: { children: ReactNode }) {
-  return (
-    <PrivyProvider
-      appId={process.env.NEXT_PUBLIC_PRIVY_APP_ID || ''}
-      config={{
-        // Offer both: existing wallets + embedded
-        // (Configure wallet connectors in the Privy Dashboard as needed)
-        embeddedWallets: { createOnLogin: 'all-users' },
-      }}
-    >
-      {children}
-    </PrivyProvider>
-  )
-}
-```
-
-Privy’s JWT model is designed to integrate with external providers and remain the source of truth for auth/wallet state. ([Privy Docs][1])
-
-Add it to `app/layout.tsx`:
+Excerpt: `packages/nextjs/components/providers/SupabaseProvider.tsx`
 
 ```tsx
-import Providers from '@/components/Providers'
+const { authenticated, ready } = usePrivy()
+const [client] = useState(() => createBrowserSupabase())
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
-  return (
-    <html lang="en">
-      <body><Providers>{children}</Providers></body>
-    </html>
-  )
-}
+const refresh = useMemo(() => async function refresh() {
+  setLoading(true)
+  try {
+    const token = await getSupabaseAccessToken()
+    setClaims(decodeJwtUnsafe(token))
+  } finally { setLoading(false) }
+}, [])
+
+useEffect(() => {
+  if (!ready) return
+  if (prevAuthRef.current === null && !authenticated) {
+    clearSupabaseTokenCache(); setClaims(null)
+  }
+  if (authenticated && !warmedRef.current) { warmedRef.current = true; void refresh() }
+  const prev = prevAuthRef.current
+  if (prev === true && authenticated === false && !clearedOnceRef.current) {
+    warmedRef.current = false; clearedOnceRef.current = true
+    clearSupabaseTokenCache(); setClaims(null); void clearSupabaseAuthCookie()
+  }
+  prevAuthRef.current = authenticated
+}, [authenticated, ready])
 ```
 
 ---
 
-## 3) **Server Action**: verify Privy → mint Supabase JWT
+## 3) Server Action: verify Privy → mint Supabase JWT
 
-Create `app/(auth)/actions.ts`:
+Implemented at: `packages/nextjs/utils/actions/auth.ts`
+
+Highlights
+- Verifies Privy JWT via Privy JWKS
+- Maps to local user UUID (upsert) using admin client
+- Signs Supabase JWT with HS256 (local) or ES256 (prod)
+- Sets `sb-access-token` HttpOnly cookie for SSR
+
+Excerpt: `packages/nextjs/utils/actions/auth.ts`
 
 ```ts
-'use server'
-
-import { jwtVerify, createRemoteJWKSet, importPKCS8, SignJWT } from 'jose'
-import { getOrCreateUserUuidFromPrivyPayload } from '@/lib/supabase/user'
-
-// Privy JWKS for your app
-const PRIVY_JWKS = createRemoteJWKSet(
-  new URL(`https://auth.privy.io/api/v1/apps/${process.env.NEXT_PUBLIC_PRIVY_APP_ID}/jwks.json`)
-)
-
-// Your Supabase private signing key (PEM). This key signs the *exchanged* JWT used by Supabase services.
-const SUPABASE_JWT_PRIVATE_KEY = process.env.SUPABASE_JWT_PRIVATE_KEY!
-const SUPABASE_ISS = `https://${process.env.NEXT_PUBLIC_SUPABASE_URL?.replace(/^https?:\/\//, '')}/auth/v1` // issuer
-
-// Implementation for user mapping is shown in section 3.1 — see `lib/supabase/user` for a production-ready helper
+const ALG = (process.env.SUPABASE_JWT_ALG || 'ES256') as 'ES256' | 'HS256'
+const PRIVY_JWKS = createRemoteJWKSet(new URL(
+  `https://auth.privy.io/api/v1/apps/${process.env.NEXT_PUBLIC_PRIVY_APP_ID}/jwks.json`
+))
+const SUPABASE_ISS = `${process.env.NEXT_PUBLIC_SUPABASE_URL!.replace(/\/$/, '')}/auth/v1`
 
 export async function exchangePrivyToken(privyAccessToken: string): Promise<string> {
-  if (!privyAccessToken) throw new Error('missing_privy_token')
+  const verified = await jwtVerify(privyAccessToken, PRIVY_JWKS)
+  const userUuid = await getOrCreateUserUuidFromPrivyPayload(verified.payload as JWTPayload)
 
-  // 1) Verify the Privy token using Privy’s JWKS
-  const { payload } = await jwtVerify(privyAccessToken, PRIVY_JWKS)
-
-  // 2) Map Privy identity -> your local users UUID (for RLS)
-  const userUuid = await getOrCreateUserUuidFromPrivyPayload(payload)
-
-  // 3) Mint a short-lived Supabase-signed JWT
-  const alg = 'RS256' // or 'ES256' if your key is EC
-  const privateKey = await importPKCS8(SUPABASE_JWT_PRIVATE_KEY, alg)
-
-  const now = Math.floor(Date.now() / 1000)
-  const exp = now + 60 * 30 // 30 minutes
-
-  const supabaseJwt = await new SignJWT({
-    sub: userUuid,           // must be your users table UUID so auth.uid() works
-    role: 'authenticated',   // typical role used by RLS
-    // add any app-specific claims required by RLS policies
-  })
-    .setProtectedHeader({ alg })
-    .setIssuer(SUPABASE_ISS)
-    .setIssuedAt(now)
-    .setExpirationTime(exp)
-    .sign(privateKey)
-
+  const now = Math.floor(Date.now()/1000); const exp = now + 60*30
+  let supabaseJwt: string
+  if (ALG === 'ES256') {
+    const key = process.env.SUPABASE_JWT_PRIVATE_KEY!.trim().startsWith('-----BEGIN')
+      ? await importPKCS8(process.env.SUPABASE_JWT_PRIVATE_KEY!.replace(/\\n/g, '\n'), 'ES256')
+      : await importJWK(JSON.parse(process.env.SUPABASE_JWT_PRIVATE_KEY!), 'ES256')
+    supabaseJwt = await new SignJWT({ sub: userUuid, role: 'authenticated' })
+      .setProtectedHeader({ alg: 'ES256', kid: process.env.SUPABASE_JWT_KID, typ: 'JWT' })
+      .setIssuer(SUPABASE_ISS).setIssuedAt(now).setExpirationTime(exp).sign(key)
+  } else {
+    const secret = (process.env.SUPABASE_JWT_HS256_SECRET || process.env.SUPABASE_JWT_PRIVATE_KEY || '').trim()
+    const b64 = Buffer.from(secret, 'utf8').toString('base64').replace(/=+$/g,'').replace(/\+/g,'-').replace(/\//g,'_')
+    const hmacKey = await importJWK({ kty:'oct', k:b64, alg:'HS256' }, 'HS256')
+    supabaseJwt = await new SignJWT({ sub: userUuid, role: 'authenticated' })
+      .setProtectedHeader({ alg: 'HS256', typ: 'JWT' })
+      .setIssuer(SUPABASE_ISS).setIssuedAt(now).setExpirationTime(exp).sign(hmacKey)
+  }
+  // Set HttpOnly cookie for SSR
+  ;(await cookies()).set('sb-access-token', supabaseJwt, { httpOnly: true, secure: true, sameSite: 'lax', path: '/', maxAge: exp-now })
   return supabaseJwt
 }
 ```
@@ -156,7 +144,7 @@ export async function exchangePrivyToken(privyAccessToken: string): Promise<stri
 
 We key on `payload.sub` (the user’s Privy DID) as the stable external identifier, upsert a row in `users`, and return our internal UUID so the exchanged Supabase JWT can set `sub = <uuid>` for RLS. This requires a server-only Supabase admin client using the Service Role key.
 
-Suggested schema (SQL):
+Suggested schema (SQL): see `packages/supabase/migrations/20250828135151_init.sql` and `packages/supabase/migrations/20250830120000_add_profile_and_policies.sql`. Minimal shape:
 
 ```sql
 -- one-time migration
@@ -170,82 +158,49 @@ create table if not exists public.users (
 create index if not exists users_privy_did_idx on public.users (privy_did);
 ```
 
-Admin client (server-only):
+Admin client (server-only): `packages/nextjs/utils/supabase/admin.ts`
 
 ```ts
-// lib/supabase/admin.ts (server-only)
-import { createClient } from '@supabase/supabase-js'
+import { Database } from "../models/supabase";
+import { createClient } from "@supabase/supabase-js";
 
-export const supabaseAdmin = createClient(
+export const supabaseAdmin = createClient<Database>(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!, // NEVER expose client-side
-  { auth: { persistSession: false } }
-)
+  process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  { auth: { persistSession: false }, global: { headers: { "x-supabase-admin": "scaffold-privy-aa" } } }
+);
 ```
 
-Finished function (replace the TODO in your Server Action file):
+User mapping helper: `packages/nextjs/utils/actions/user.ts`
 
 ```ts
-import { supabaseAdmin } from '@/lib/supabase/admin'
-
-type PrivyAccessTokenPayload = {
-  sub: string;           // Privy DID (stable user id)
-  sid?: string;
-  iss?: string;          // 'privy.io'
-  aud?: string;          // your app id
-  iat?: number;
-  exp?: number;
-  // If using an Identity Token instead of Access Token, you may also see:
-  // linked_accounts?: string;   // JSON string
-  // custom_metadata?: string;   // JSON string
-}
-
-export async function getOrCreateUserUuidFromPrivyPayload(
-  payload: PrivyAccessTokenPayload
-): Promise<string> {
-  if (!payload?.sub) throw new Error('privy_payload_missing_sub')
-  const privyDid = payload.sub
-
-  // 1) Lookup
+export async function getOrCreateUserUuidFromPrivyPayload(payload: JWTPayload & { sub: string }): Promise<string> {
+  if (!payload?.sub) throw new Error("privy_payload_missing_sub");
+  const privyDid = payload.sub;
   {
-    const { data, error } = await supabaseAdmin
-      .from('users')
-      .select('id')
-      .eq('privy_did', privyDid)
-      .maybeSingle()
-    if (error) throw new Error(`users_lookup_failed:${error.message}`)
-    if (data?.id) return data.id
+    const { data, error } = await supabaseAdmin.from("users").select("id").eq("privy_did", privyDid).maybeSingle();
+    if (error) throw new Error(`users_lookup_failed:${error.message}`);
+    if (data?.id) return data.id as string;
   }
-
-  // 2) Optional: parse email from Identity Token (not present in Access Tokens)
-  let email: string | null = null
-  // Example if later using Identity Token with linked_accounts JSON:
-  // try {
-  //   const la = (payload as any)?.linked_accounts ? JSON.parse((payload as any).linked_accounts) : []
-  //   const emailAcc = la.find((a: any) => a?.type === 'email' && a?.address)
-  //   email = emailAcc?.address ?? null
-  // } catch {}
-
-  // 3) Insert
+  const email: string | null = null;
   const { data: inserted, error: insertErr } = await supabaseAdmin
-    .from('users')
+    .from("users")
     .insert({ privy_did: privyDid, email })
-    .select('id')
-    .single()
+    .select("id")
+    .single();
   if (insertErr) {
-    // Handle race: unique violation
-    if ((insertErr as any).code === '23505') {
+    if ((insertErr as any).code === "23505") {
       const { data: again, error: againErr } = await supabaseAdmin
-        .from('users')
-        .select('id')
-        .eq('privy_did', privyDid)
-        .single()
-      if (againErr || !again?.id) throw new Error(`users_select_after_conflict_failed:${againErr?.message}`)
-      return again.id
+        .from("users")
+        .select("id")
+        .eq("privy_did", privyDid)
+        .single();
+      if (againErr || !again?.id) throw new Error(`users_select_after_conflict_failed:${againErr?.message}`);
+      return again.id as string;
     }
-    throw new Error(`users_insert_failed:${insertErr.message}`)
+    throw new Error(`users_insert_failed:${insertErr.message}`);
   }
-  return inserted.id
+  return inserted!.id as string;
 }
 ```
 
@@ -261,25 +216,21 @@ Why `payload.sub`:
 
 ---
 
-## 4) Supabase client with **custom access token**
+## 4) Supabase client with custom access token (browser)
 
-`lib/supabase/client.ts`
+Implemented at: `packages/nextjs/utils/supabase/client.ts`
 
 ```ts
-import { createClient } from '@supabase/supabase-js'
-import { getSupabaseAccessToken } from '@/lib/token-cache'
+import { createBrowserClient } from "@supabase/ssr";
+import { getSupabaseAccessToken } from "~~/services/store/token-cache";
 
-// IMPORTANT: use the accessToken callback (official pattern for custom tokens)
-export const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY!,
-  {
-    accessToken: async () => {
-      const token = await getSupabaseAccessToken()
-      return token ?? ''
-    },
-  }
-)
+export function createClient() {
+  return createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY!,
+    { accessToken: async () => (await getSupabaseAccessToken()) ?? "" }
+  );
+}
 ```
 
 Supabase JS supports providing your own access token via the `accessToken` option; that token will be attached to requests and used for RLS. ([Supabase][5])
@@ -288,136 +239,112 @@ Supabase JS supports providing your own access token via the `accessToken` optio
 
 ## 5) Client‑side token cache + sync with Privy
 
-We’ll keep a small in‑memory token cache and refresh it via a client helper that calls the **Server Action**.
-
-`lib/token-cache.ts`
+Implemented at: `packages/nextjs/services/store/token-cache.ts`
 
 ```ts
-'use client'
+"use client";
 
-import { exchangePrivyToken } from '@/app/(auth)/actions'
-import { getPrivyToken } from '@/lib/privy-helpers'
+import { getPrivyToken } from "../../services/web3/privyToken";
+import { exchangePrivyToken } from "~~/utils/actions/auth";
 
-let cached: { token: string; exp: number } | null = null
+let cached: { token: string; exp: number } | null = null;
+const LS_KEY = "sb_exch";
 
-function nowSec() {
-  return Math.floor(Date.now() / 1000)
-}
+function nowSec() { return Math.floor(Date.now() / 1000) }
 
 export async function getSupabaseAccessToken(): Promise<string | null> {
-  if (cached && cached.exp - 30 > nowSec()) {
-    return cached.token
+  if (!cached && typeof window !== "undefined") {
+    try {
+      const raw = window.localStorage.getItem(LS_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw) as { token: string; exp: number };
+        if (parsed?.token && parsed?.exp && parsed.exp - 30 > nowSec()) cached = parsed;
+      }
+    } catch {}
   }
-  const privyToken = await getPrivyToken() // read current Privy access token (client)
-  if (!privyToken) return null
-
-  // Call Server Action to exchange
-  const supaToken = await exchangePrivyToken(privyToken)
-
-  // Decode exp (cheap decode: header.payload.signature -> payload base64)
-  const payload = JSON.parse(atob(supaToken.split('.')[1]))
-  cached = { token: supaToken, exp: payload.exp }
-  return supaToken
+  if (cached && cached.exp - 30 > nowSec()) return cached.token;
+  const privyToken = await getPrivyToken();
+  if (!privyToken) return null;
+  const supaToken = await exchangePrivyToken(privyToken);
+  try {
+    const payload = JSON.parse(atob(supaToken.split(".")[1] ?? ""));
+    cached = { token: supaToken, exp: payload.exp ?? nowSec() + 600 };
+  } catch { cached = { token: supaToken, exp: nowSec() + 600 } }
+  try { if (typeof window !== "undefined") window.localStorage.setItem(LS_KEY, JSON.stringify(cached)) } catch {}
+  return supaToken;
 }
 
-// Optionally expose a way to clear cache on logout
 export function clearSupabaseTokenCache() {
-  cached = null
+  cached = null; try { if (typeof window !== "undefined") window.localStorage.removeItem(LS_KEY) } catch {}
 }
 ```
 
-`lib/privy-helpers.ts`
+Privy token helper: `packages/nextjs/services/web3/privyToken.ts`
 
 ```ts
-'use client'
+"use client";
 
-import { usePrivy, getAccessToken } from '@privy-io/react-auth'
+import { getAccessToken, usePrivy } from "@privy-io/react-auth";
 
-// Option A: Hook usage from components
-export function usePrivyAccessToken() {
-  const { user, ready, authenticated, getAccessToken } = usePrivy()
-  const read = async () => (authenticated ? await getAccessToken() : null)
-  return { user, ready, authenticated, read }
-}
-
-// Option B: plain helper (when outside components)
 export async function getPrivyToken(): Promise<string | null> {
   try {
-    // @privy-io/react-auth exports getAccessToken in recent SDKs; otherwise read via usePrivy()
-    // If unavailable, expose a small context that stores the last token.
+    // getAccessToken may be undefined in some SDK versions
     // @ts-ignore
-    const token = await getAccessToken?.()
-    return token ?? null
+    const token = await getAccessToken?.();
+    return token ?? null;
   } catch {
-    return null
+    return null;
   }
+}
+
+export function usePrivyAccessToken() {
+  const { authenticated, getAccessToken: hookGetAccessToken, user, ready } = usePrivy();
+  const read = async () => (authenticated ? await hookGetAccessToken() : null);
+  return { user, ready, authenticated, read };
 }
 ```
 
-Privy’s “use your own auth” pattern uses hooks to keep the SDK in sync; in **Privy‑first**, the SDK *is* the source of truth and can provide the current access token to exchange. ([Privy Docs][6])
+Privy’s “use your own auth” pattern uses hooks to keep the SDK in sync; in **Privy‑first**, the SDK is the source of truth and can provide the current access token to exchange. ([Privy Docs][6])
 
 ---
 
-## 6) RLS policy checklist
+## 6) Supabase server client (SSR)
 
-* Your policies likely rely on `auth.uid()`; set `sub` in the exchanged JWT to your **users.id (UUID)**.
+Implemented at: `packages/nextjs/utils/supabase/server.ts`
+
+```ts
+import { cookies } from "next/headers";
+import { createServerClient } from "@supabase/ssr";
+
+export async function createClient(exchangedJwt?: string) {
+  const cookieStore = await cookies();
+  const token = exchangedJwt ?? cookieStore.get("sb-access-token")?.value ?? "";
+  return createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY!,
+    {
+      cookies: {
+        getAll() { return cookieStore.getAll() },
+        setAll(cookiesToSet) {
+          try { cookiesToSet.forEach(({ name, value, options }) => cookieStore.set(name, value, options)) } catch {}
+        },
+      },
+      global: { headers: token ? { Authorization: `Bearer ${token}` } : {} },
+    }
+  );
+}
+```
+
+## 7) RLS policy checklist
+
+* Your policies likely rely on `auth.uid()`; set `sub` in the exchanged JWT to your `users.id` (UUID). See `packages/supabase/migrations/20250830120000_add_profile_and_policies.sql`.
 * Set `role = 'authenticated'` (or your chosen role).
 * Add any custom claims your policies expect. Supabase explains how JWTs power RLS and how services verify them. ([Supabase][4])
 
 ---
 
-## 7) “Balls‑deep” execution plan
+That’s it. With this wiring, Privy remains your source of truth for auth, while Supabase enforces RLS using a short‑lived, app‑signed JWT that encodes your users UUID in `sub`.
 
-**Phase A — Foundations (1–2 hrs)**
-
-1. **Enable asymmetric keys** in Supabase and confirm project **JWKS** endpoint works. ([Supabase][2])
-2. In Privy Dashboard, configure **wallet connectors** (Injected/WalletConnect/Coinbase) and optional **embedded wallets**. (Privy supports JWT‑based auth integrations and mixed wallet UX). ([Privy Docs][1])
-3. Add ENV vars; install `@privy-io/react-auth`, `@supabase/supabase-js`, `jose`.
-
-**Deliverables:** `.env.local`, Providers scaffold, packages installed.
-
----
-
-**Phase B — Token Exchange via Server Actions (2–3 hrs)**
-
-1. Implement **Server Action** `exchangePrivyToken()` (verify with Privy JWKS → mint Supabase JWT using your **private signing key**). Use `jose`’s `createRemoteJWKSet`, `jwtVerify`, and `importPKCS8`/`SignJWT`. ([Privy Docs][1])
-2. Implement user mapping `getOrCreateUserUuidFromPrivyPayload()` (DB insert/select).
-3. Build **client token cache** + helper to grab current Privy token and call the Server Action.
-4. Configure Supabase JS **with** `accessToken` callback returning the exchanged token. ([Supabase][5])
-
-**Deliverables:** `app/(auth)/actions.ts`, `lib/token-cache.ts`, `lib/privy-helpers.ts`, `lib/supabase/client.ts`.
-
----
-
-**Phase C — Auth UI & lifecycle (1–2 hrs)**
-
-1. Wire **PrivyProvider**; add a minimal **Sign In** button using Privy’s UI (or auto‑prompt).
-2. On **login**: first Supabase call triggers `accessToken()` → exchange → you’re RLS‑authorized.
-3. On **logout**: call Privy logout → clear local cache (`clearSupabaseTokenCache()`).
-
-**Deliverables:** Working login/logout; Supabase queries return user‑scoped results.
-
----
-
-**Phase D — Security & production hardening (1–2 hrs)**
-
-1. Rotate **Supabase signing keys** and verify your minted tokens are accepted (JWKS discovery). ([Supabase][2])
-2. Shorten token TTL (e.g., 15–30 min) and implement silent refresh on 401.
-3. Add rate limiting to Server Action (per IP/session) and basic telemetry.
-4. Ensure `SUPABASE_JWT_PRIVATE_KEY` is **never** exposed client‑side; server actions run on the server only.
-5. Validate Privy token audience/issuer if documented by your SDK version.
-
----
-
-**Phase E — QA checklist**
-
-* ✅ Privy login with **existing wallet** and **embedded wallet** both work.
-* ✅ `exchangePrivyToken()` rejects invalid/expired Privy tokens.
-* ✅ Supabase query includes exchanged JWT; RLS enforces `auth.uid() = users.id`.
-* ✅ Key rotation test passes (new public key published on JWKS recognized). ([Supabase][2])
-* ✅ Server Action never leaks the private key.
-
----
 
 ## 8) References
 
@@ -429,9 +356,7 @@ Privy’s “use your own auth” pattern uses hooks to keep the SDK in sync; in
 
 ---
 
-### Final note
-
-This plan uses **no API routes**—only **Server Actions**—and matches your ENV format. It gives you Privy’s best UX (existing + embedded wallets) while keeping Supabase’s **RLS** airtight via exchanged, project‑signed JWTs. If you want, I can also add a tiny **SQL migration** for the `users` table and a sample `getOrCreateUserUuidFromPrivyPayload()` implementation wired to your schema.
+ 
 
 [1]: https://docs.privy.io/authentication/user-authentication/jwt-based-auth?utm_source=chatgpt.com "Using your own authentication provider - Privy Docs"
 [2]: https://supabase.com/docs/guides/auth/signing-keys?utm_source=chatgpt.com "JWT Signing Keys | Supabase Docs"
